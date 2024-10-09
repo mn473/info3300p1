@@ -34,7 +34,7 @@
     <div id="legend2"></div>
 
     <script>
-        d3.csv("noon_perfumes_dataset.csv").then(function(data) {
+        d3.csv("../noon_perfumes_dataset.csv").then(function(data) {
             data.forEach(d => {
                 d['new_price'] = Number(d['new_price']);
                 d['ml'] = Number(d['ml']);
