@@ -59,7 +59,7 @@
         let noteFrequency = {};
         
         data.forEach(d => {
-            let middleNotes = d['middle_note'].split(/,|\s+and\s+/).map(note => note.trim());
+            let middleNotes = d['middle_note'].split(/,|\s+and\s+/i).map(note => note.trim());
             let scent = d['scents_group']; 
 
             middleNotes.forEach(note => {
@@ -85,6 +85,7 @@
                 count: noteFrequency[note][scent]
             });
         }
+         
         noteData.forEach(entry => {
         console.log(`Scent: ${entry.scent}, Note: ${entry.note}, Count: ${entry.count}`);
     });
