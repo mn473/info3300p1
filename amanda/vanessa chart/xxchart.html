@@ -1,0 +1,32 @@
+<html>
+<head>
+    <title>XXX Chart (Amanda/Vanessa) -- DECIDE WHICH ONE</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <style></style>
+</head>
+<body>
+    <h3> Descriptive Chart Title</h3>
+    <svg id="XXX" width="600" height="500"></svg>
+
+    <script>
+    d3.csv("../noon_perfumes_dataset.csv").then(function(data) {
+        data.forEach(d => {
+            d['middle_note'] = Number(d['middle_note']);
+            d['scents'] = Number(d['scents']);
+        });
+
+        
+
+
+
+
+
+
+
+
+
+    });
+    </script>
+</body>
+</html>
