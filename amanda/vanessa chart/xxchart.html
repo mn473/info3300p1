@@ -7,47 +7,136 @@
 </head>
 <body>
     <h3> Descriptive Chart Title</h3>
-    <svg id="XXX" width="600" height="500"></svg>
+    <svg id="stackedchart" width="600" height="500"></svg>
 
     <script>
-    d3.csv("../noon_perfumes_dataset.csv").then(function(data) {
-        data.forEach(d => {
-            d['middle_note'] = Number(d['middle_note']);
-            d['scents'] = Number(d['scents']);
-        });
 
-        // bar chart to check frequency of middle notes
-        const svg = d3.select("#XXX")
-                      .append("svg")
-                    //   .attr()
-                    //   .attr()
+    const svg = d3.select('svg#stackedchart');
+    const width = svg.attr('width');
+    const height = svg.attr('height');
+
+    const margins = { top: 20, right: 20, bottom: 50, left: 50 };
+    const chartWidth = width - margins.left - margins.right;
+    const chartHeight = height - margins.top - margins.bottom;
+
+    const chartArea = svg.append('g')
+        .attr('transform', `translate(${margins.left}, ${margins.top})`);
+
+    d3.csv("filtered_top_10_scents.csv").then(function(data) {
+        // // data.forEach(d => {
+        // //     d['middle_note'] = Number(d['middle_note']);
+        // //     d['scents'] = Number(d['scents']);
+        // // });
+
+        // // bar chart to check frequency of middle notes
+        // const svg = d3.select("#XXX")
+        //               .append("svg")
+        //             //   .attr()
+        //             //   .attr()
 
 
-        const middleNoteAxis = d3.scaleBand()
-                                 .domain(d['middle_note'])
-                                 .range([0, width]);
+        // // const middleNoteAxis = d3.scaleBand()
+        // //                          .domain(d['middle_note'])
+        // //                          .range([0, width]);
         
         
-        // for loop to count # of notes
-        data.forEach( d => {
+        // // // for loop to count # of notes
+        // // data.forEach( d => {
             
-        })
+        // // })
 
-        // add frequencies to chart as bars
-        let bars = chartArea.selectAll("rect").data(data)
-                            .attr("x",)
-                            .attr("y")
-                            .attr("width", middleNoteAxis.bandwidth())
-                            //    .attr("height", d => { height - })
-                            .attr("fill", "steelblue")
+        // // add frequencies to chart as bars
+        // let bars = chartArea.selectAll("rect").data(data)
+        //                     .attr("x",)
+        //                     .attr("y")
+        //                     .attr("width", middleNoteAxis.bandwidth())
+        //                     //    .attr("height", d => { height - })
+        //                     .attr("fill", "steelblue")
+
+        // //                     d3.csv("/noon_perfumes_dataset.csv").then(function(data) {
+        data = data.filter(d => d['scents'] && d['middle_note']);
+
+        let noteFrequency = {};
+        
+        data.forEach(d => {
+            let middleNotes = d['middle_note'].split(/,|\s+and\s+/).map(note => note.trim());
+            let scent = d['scents_group']; 
+
+            middleNotes.forEach(note => {
+                if (!noteFrequency[note]) {
+                    noteFrequency[note] = {};
+                }
+                
+                if (!noteFrequency[note][scent]) {
+                    noteFrequency[note][scent] = 0;
+                }
+
+                noteFrequency[note][scent]++;
+            });
+            console.log(noteFrequency);
+        });
+        //counts the frequency of each unique scent: note pairs 
+        let noteData = [];
+        for (let note in noteFrequency) {
+        for (let scent in noteFrequency[note]) {
+            noteData.push({
+                note: note,
+                scent: scent,
+                count: noteFrequency[note][scent]
+            });
+        }
+        noteData.forEach(entry => {
+        console.log(`Scent: ${entry.scent}, Note: ${entry.note}, Count: ${entry.count}`);
+    });
+    }
 
 
+        // let stackedData = [];
+        // for (let note in noteFrequency) {
+        //     let entry = { note: note };
+        //     for (let scent in noteFrequency[note]) {
+        //         entry[scent] = noteFrequency[note][scent];
+        //     }
+        //     stackedData.push(entry);
+        // }
 
+        // let scents = [];
+        // data.forEach(d => {
+        //     if (!scentTypes.includes(d['scents'])) {
+        //         scentTypes.push(d['scents']);
+        //     }
+        // });q        
+        // let notes = [];
+        // stackedData.forEach(d => {
+        //     if (!notes.includes(d['note'])) {
+        //         notes.push(d['note']);
+        //     }
+        // });
 
+        // // scales
+        // const x = d3.scaleBand()
+        //     .domain(notes)
+        //     .range([0, chartWidth])
+        //     .padding([0.2]);
 
+        // const y = d3.scaleLinear()
+        //     .domain([0, d3.max(stackedData, d => d3.sum(scentTypes.map(scent => d[scent] || 0)))])
+        //     .range([chartHeight, 0]);
+        //     chartArea.append("g")
+        //             .call(d3.axisLeft(y));
 
+        // const color = d3.scaleOrdinal()
+        //     .domain(scents)
+        //     .range(d3.schemeSet2);
+
+        // // Create the stacked data
+        // const stack = d3.stack()
+        //     .keys(scents)
+        //     .value((d, key) => d[key] || 0);
+        // const layers = stack(stackedData);
 
     });
+
     </script>
 </body>
 </html>
