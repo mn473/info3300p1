@@ -16,9 +16,30 @@
             d['scents'] = Number(d['scents']);
         });
 
+        // bar chart to check frequency of middle notes
+        const svg = d3.select("#XXX")
+                      .append("svg")
+                    //   .attr()
+                    //   .attr()
+
+
+        const middleNoteAxis = d3.scaleBand()
+                                 .domain(d['middle_note'])
+                                 .range([0, width]);
         
+        
+        // for loop to count # of notes
+        data.forEach( d => {
+            
+        })
 
-
+        // add frequencies to chart as bars
+        let bars = chartArea.selectAll("rect").data(data)
+                            .attr("x",)
+                            .attr("y")
+                            .attr("width", middleNoteAxis.bandwidth())
+                            //    .attr("height", d => { height - })
+                            .attr("fill", "steelblue")
 
 
 
