@@ -1,0 +1,153 @@
+<html>
+
+<head>
+  <title>Pie Chart - Perfume Data</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    #pie-charts {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 50px;
+    }
+
+    #men-pie {
+      margin: 10px;
+    }
+
+    #women-pie {
+      margin: 10px;
+    }
+
+    #unisex-pie {
+      margin: 10px;
+    }
+
+    #pie-legend {
+      text-align: center;
+    }
+
+    #pie-title {
+      text-align: center;
+      font-size: 25px;
+      font-weight: bold;
+      margin-top: 50px;
+      margin-bottom: -20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 id="pie-title">Prominent Scents in Each Department</h1>
+
+  <!-- charts for departments -->
+  <div id="pie-charts">
+    <div id="men-pie"></div>
+    <div id="women-pie"></div>
+    <div id="unisex-pie"></div>
+  </div>
+
+  <div id="pie-legend"></div>
+
+  <script>
+    const margin = 20;
+    const width = 200;
+    const height = 200;
+
+    const radius = Math.min(width, height) / 2;
+    const innerRadius = radius * 0.3;
+
+    // changed so prettier colors
+    const color = d3.scaleOrdinal()
+      .domain(['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'])
+      .range(['#2E86C1', '#9B59B6', '#C0392B', '#F1C40F', '#28B463', '#BDC3C7', '#2E4053', '#DA23C1', '#EDBB99', '#76D7C4']);
+
+    // legend
+    const scentsLegend = color.domain();
+
+    d3.select("#pie-legend")
+      .append("span")
+      .text("Scents: ")
+      .style("font-weight", "bold")
+      .style("font-size", "14px")
+      .style("margin-right", "15px");
+
+    scentsLegend.forEach(scent => {
+      d3.select("#pie-legend").append("span")
+        .style("display", "inline-block")
+        .style("width", "20px")
+        .style("height", "10px")
+        .style("background-color", color(scent))
+        .style("margin-right", "3px");
+
+      d3.select("#pie-legend").append("span")
+        .text(scent)
+        .style("margin-right", "15px")
+        .style("font-size", "14px");
+    });
+
+
+    // furthering filtering data
+    d3.csv('filtered_top_10_scents.csv').then(data => {
+
+      data.forEach(d => {
+        d.department = d.department.trim();
+        d.scents = d.scents.trim();
+      });
+
+      // grouping by department/scents and counting (result is a map)
+      const scentDistribution = d3.rollups(data, v => v.length, d => d.department, d => d.scents);
+
+      // setting up donut chart sizing
+      const pie = d3.pie().value(d => d.count);
+      const arc = d3.arc().innerRadius(innerRadius).outerRadius(radius);
+
+      // create donuts for each department and scents distribution
+      function createChart(id, scentsData, department) {
+        //svg
+        const svg = d3.select(id)
+          .append("svg")
+          .attr("width", width)
+          .attr("height", height)
+          .append("g")
+          .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+        svg.selectAll('path')
+          .data(pie(scentsData))
+          .join('path')
+          .attr('d', arc)
+          .attr('fill', d => color(d.data.scent))
+          .attr("stroke", "#ffffff")
+          .style("stroke-width", "2px");
+
+        svg.append("text")
+          .attr("class", "chart-title")
+          .attr("text-anchor", "middle")
+          .attr("dy", 5)
+          .attr("font-size", "15px")
+          .text(department);
+      }
+
+      // men
+      // finds men department from scentDistribution mapping and gets scent count too
+      const menScentData = scentDistribution.find(d => d[0] === "Men")[1];
+      // creates a new array in format for pie
+      const menData = menScentData.map(([scent, count]) => ({ scent, count }));
+      createChart('#men-pie', menData, 'Men');
+
+      // women 
+      const womenScentData = scentDistribution.find(d => d[0] === "Women")[1];
+      const womenData = womenScentData.map(([scent, count]) => ({ scent, count }));
+      createChart('#women-pie', womenData, 'Women');
+
+      // unisex
+      const unisexScentData = scentDistribution.find(d => d[0] === "Unisex")[1];
+      const unisexData = unisexScentData.map(([scent, count]) => ({ scent, count }));
+      createChart('#unisex-pie', unisexData, 'Unisex');
+
+    });
+
+  </script>
+</body>
+
+</html>
