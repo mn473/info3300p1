@@ -1,0 +1,10 @@
+{
+    "oriental": ["vanilla", "amber", "musk", "incense", "spicy", "arabian", "spice", "tonka", "benzoin", "ginger", "chocolate",
+    "cloves", "cardamom", "resin", "tea", "pepper", "suede", "cinnamon", "chestnut", "ambergris"],
+    "floral": ["orange blossom", "jasmine", "lily", "rose", "lavender", "gardenia", "iris", "violet", "magnolia", "freesia", "peony",
+    "carnation", "heliotrope", "geranium", "flower", "floral", "tuberose", "honeysuckle", "wisteria", "osmanthus", "ylang", "powder",
+    "aromatic", "sweet", "berry", "berries", "fruit"],
+    "woody": ["patchouli", "sandalwood", "cedar", "vetiver", "moss", "wood", "dry", "herb", "oak", "pine", "cashmere", "leather",
+    "suede", "tea", "chestnut", "birch", "tree", "nut"],
+    "fresh": ["citrus", "marine", "grass", "bergamot", "lemon", "fruit", "green", "herb", "aquatic", "neroli", "water"]
+}
