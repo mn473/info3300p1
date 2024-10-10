@@ -12,7 +12,7 @@
             Promise.all([d3.csv("scent_categories.csv"), d3.csv("filtered_top_10_scents.csv")]).then(([categories, perfumes]) => {
 
             perfumes.forEach(perfume => {
-                let notes = (perfume.base_note + "," + perfume.middle_note).toLowerCase().split(",");
+                let notes = (perfume.middle_note).toLowerCase().split(",");
                 perfume.scores = {
                     oriental: 0,
                     floral: 0,
@@ -74,28 +74,24 @@
             svg.append("text")
                 .attr("x", width)
                 .attr("y", height/2)
-                .attr("dy", "1em")
                 .style("text-anchor", "end")
                 .text("Oriental");
 
             svg.append("text")
                 .attr("x", 0)
                 .attr("y", height/2)
-                .attr("dy", "1em")
                 .style("text-anchor", "start")
                 .text("Floral");
 
             svg.append("text")
                 .attr("x", width/2)
                 .attr("y", 0)
-                .attr("dy", "1em")
                 .style("text-anchor", "middle")
                 .text("Fresh");
 
             svg.append("text")
                 .attr("x", width/2)
                 .attr("y", height)
-                .attr("dy", "-0.5em")
                 .style("text-anchor", "middle")
                 .text("Woody");
 });
