@@ -1,0 +1,104 @@
+<html>
+    <head>
+        <title>Where the perfumes fall in the types of scents?</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+    </head>
+
+    <body>
+        <svg id="fqchart" height="500" width="600"></svg>
+
+        <script>
+            // d3.csv("../amanda/vanessa_chart/filtered_top_10_scents.csv").then(function(data) {})
+            Promise.all([d3.csv("scent-categories.csv"), d3.csv("filtered_top_10_scents.csv")]).then(([categories, perfumes]) => {
+
+            perfumes.forEach(perfume => {
+                let notes = (perfume.base_note + "," + perfume.middle_note).toLowerCase().split(",");
+                perfume.scores = {
+                    oriental: 0,
+                    floral: 0,
+                    woody: 0,
+                    fresh: 0
+                };
+                
+                // update score if perfume has a note in scent category
+                notes.forEach(note => {
+                    for (let category in categories) {
+                        if (categories[category].some(keyword => note.includes(keyword))) {
+                        perfume.scores[category]++; }
+                    }
+                });
+
+                // calculate (x, y) position for quadrant chart
+                perfume.x = perfume.scores.oriental - perfume.scores.floral;
+                perfume.y = perfume.scores.fresh - perfume.scores.woody;
+            });
+            
+            const svg = d3.select('svg#fqchart');
+            const width = svg.attr('width');
+            const height = svg.attr('height');
+
+            const margins = { top: 20, right: 20, bottom: 100, left: 70 };
+            const chartWidth = width - margins.left - margins.right;
+            const chartHeight = height - margins.top - margins.bottom;
+
+            const chartArea = svg.append('g')
+                                 .attr('transform', `translate(${margins.left}, ${margins.top})`);
+
+            const x = d3.scaleLinear()
+                .domain(d3.extent(perfumes, d => d.x))
+                .range([margin.left, width - margin.right]);
+
+            const y = d3.scaleLinear()
+                .domain(d3.extent(perfumes, d => d.y))
+                .range([height - margin.bottom, margin.top]);
+
+            // axes
+            svg.append("g")
+                .attr("transform", `translate(0,${height/2})`)
+                .call(d3.axisBottom(x));
+
+            svg.append("g")
+                .attr("transform", `translate(${width/2},0)`)
+                .call(d3.axisLeft(y));
+
+            // Add perfume points
+            svg.selectAll("circle")
+                .data(perfumes)
+                .enter().append("circle")
+                .attr("cx", d => x(d.x))
+                .attr("cy", d => y(d.y))
+                .attr("r", 5)
+                .attr("fill", "steelblue");
+
+            // Add labels
+            svg.append("text")
+                .attr("x", width)
+                .attr("y", height/2)
+                .attr("dy", "1em")
+                .style("text-anchor", "end")
+                .text("Oriental");
+
+            svg.append("text")
+                .attr("x", 0)
+                .attr("y", height/2)
+                .attr("dy", "1em")
+                .style("text-anchor", "start")
+                .text("Floral");
+
+            svg.append("text")
+                .attr("x", width/2)
+                .attr("y", 0)
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .text("Fresh");
+
+            svg.append("text")
+                .attr("x", width/2)
+                .attr("y", height)
+                .attr("dy", "-0.5em")
+                .style("text-anchor", "middle")
+                .text("Woody");
+});
+        </script>
+    </body>
+</html>
