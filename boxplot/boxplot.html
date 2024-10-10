@@ -5,30 +5,28 @@
         <style>
             h3 {
                 font-family: 'Arial', sans-serif; 
-                text-align: center; 
                 font-size: 24px; 
+                margin-left: 400px;
             }
             .grid-line {
                 stroke: gray;
                 stroke-width: 2px;
                 stroke-dasharray: 4;
             }
-            #chartDiv, 
+
             #legend {
                 font-family: 'Arial', sans-serif;
-                text-align: center; 
+                margin-left: 350px;
             }
         </style>
     </head>
     <body>
         <h3>Perfumes Price vs Scent Groups by Bottle Size</h3>
-        <div id="chartDiv">
-            <svg id="chart" height="700" width="1500"></svg>
-            <div id="legend"></div>
-        </div>
-
+        <svg id="chart" height="700" width="1500"></svg>
+        <div id="legend"></div>
+        
         <script>
-            d3.csv("../noon_perfumes_dataset.csv", d3.autoType)
+            d3.csv('../noon_perfumes_dataset.csv', d3.autoType)
                 .then((data) => {
                     data.forEach(d => {
                         d['new_price'] = Number(d['new_price']);
@@ -158,6 +156,7 @@
                     bottleSizes.forEach(size => {
                         const sizeData = groupData.filter(d => d.bottle_size == size);
                         if (sizeData.length > 0) {
+                    
                             const sortedPrices = sizeData.map(d => d.new_price).sort(d3.ascending);
                             const data_sorted = data.sort(d3.ascending)
                             const q1 = d3.quantile(sortedPrices, 0.25);
@@ -263,6 +262,21 @@
                         .style("margin-right", "20px")
                         .style("font-size", "14px");
                 });
+
+                d3.select("#legend").append("div")
+                    .style("display", "inline-block")
+                    .style("width", "12px")
+                    .style("height", "12px")
+                    .style("background-color", "yellow")
+                    .style("border", "1.5px solid black")
+                    .style("border-radius", "50%")
+                    .style("margin-left", "20px");
+
+                d3.select("#legend").append("span")
+                    .text("Average Price")
+                    .style("margin-left", "10px")
+                    .style("font-size", "14px");
+
             });
         </script>
     </body>
