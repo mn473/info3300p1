@@ -9,6 +9,7 @@
       justify-content: center;
       align-items: center;
       margin: 50px;
+      margin-top: 0px;
     }
 
     #men-pie {
@@ -34,11 +35,24 @@
       margin-top: 50px;
       margin-bottom: -20px;
     }
+    #label {
+    position: absolute;
+    top: 100px;
+    right: 10%;
+    margin:0px;
+    padding: 0px;
+    font-size: 16px;
+    pointer-events: none; 
+  }
   </style>
 </head>
 
 <body>
   <h1 id="pie-title">Prominent Scents in Each Department</h1>
+  <svg id="piechart" height="50" width="50"></svg>
+
+  <text id="label"></text>
+
 
   <!-- charts for departments -->
   <div id="pie-charts">
@@ -118,7 +132,26 @@
           .attr('d', arc)
           .attr('fill', d => color(d.data.scent))
           .attr("stroke", "#ffffff")
-          .style("stroke-width", "2px");
+          .style("stroke-width", "2px")
+          .on("mouseover", function (event, d) {
+            let title = d.data.scent + ": " + d.data.count;
+            d3.select("#label").text(title);
+                d3.select(this)
+                    .transition()
+                    .duration(100)
+                    .attr("stroke", "black")
+                    .attr("stroke-width",3)
+                    .attr("opacity", .8);
+                    
+            })
+            .on("mouseout", function () {
+                d3.select(this)
+                    .transition()
+                    .duration(100)
+                    .attr("stroke", "none")
+                    .attr("stroke-width", 0)
+                    .attr("opacity", 1);
+                    d3.select("#label").text("")});
 
         svg.append("text")
           .attr("class", "chart-title")

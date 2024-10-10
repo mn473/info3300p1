@@ -21,12 +21,12 @@
         .attr('transform', `translate(${margins.left}, ${margins.top})`);
 
     d3.csv("filtered_top_10_scents.csv").then(function(data) {
-        data = data.filter(d => d['scents_group'] && d['middle_note']);
+        data = data.filter(d => d['scents_group'] && d['base_note']);
         
         let noteFrequency = {};
 
         data.forEach(d => {
-            let middleNotes = d['middle_note'].split(/,|\s+and\s+/i).map(note => note.trim());
+            let middleNotes = d['base_note'].split(/,|\s+and\s+/i).map(note => note.trim());
             let scent = d['scents_group']; 
 
             middleNotes.forEach(note => {
