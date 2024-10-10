@@ -9,90 +9,104 @@
 
         <script>
             // d3.csv("../amanda/vanessa_chart/filtered_top_10_scents.csv").then(function(data) {})
-            Promise.all([d3.csv("scent_categories.csv"), d3.csv("filtered_top_10_scents.csv")]).then(([categories, perfumes]) => {
+            Promise.all([d3.csv("scent_categories.csv"), d3.csv("filtered_top_10_scents.csv")]).then(([categoriesData, perfumes]) => {
+    let categories = {};
 
-            perfumes.forEach(perfume => {
-                let notes = (perfume.middle_note).toLowerCase().split(",");
-                perfume.scores = {
-                    oriental: 0,
-                    floral: 0,
-                    woody: 0,
-                    fresh: 0
-                };
-                
-                // update score if perfume has a note in scent category
-                notes.forEach(note => {
-                    for (let category in categories) {
-                        if (categories[category].some(keyword => note.includes(keyword))) {
-                        perfume.scores[category]++; }
-                    }
-                });
+    categoriesData.forEach(row => {
+        const category = row.category.trim().toLowerCase();
+        const notes = row.notes.split(',').map(note => note.trim().toLowerCase());
+        categories[category] = notes;
+    });
 
-                // calculate (x, y) position for quadrant chart
-                perfume.x = perfume.scores.oriental - perfume.scores.floral;
-                perfume.y = perfume.scores.fresh - perfume.scores.woody;
-            });
+    perfumes.forEach(perfume => {
+        let notes = (perfume.middle_note).toLowerCase().split(",");
+        perfume.scores = {
+            oriental: 0,
+            floral: 0,
+            woody: 0,
+            fresh: 0
+        };
 
-            const margin = {top: 30, right: 30, bottom: 50, left: 50};
-            const width = 600 - margin.left - margin.right;
-            const height = 400 - margin.top - margin.bottom;
+        notes.forEach(note => {
+            note = note.trim().toLowerCase();
+            for (let category in categories) {
+                if (categories[category].some(keyword => note.includes(keyword))) {
+                    perfume.scores[category]++;
+                }
+            }
+        });
 
-            const svg = d3.select("#heatmap")
-            .append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-                .attr("transform", `translate(${margin.left},${margin.top})`);
+        // Calculate (x, y) position for quadrant chart
+        perfume.x = perfume.scores.oriental - perfume.scores.floral;
+        perfume.y = perfume.scores.fresh - perfume.scores.woody;
+    });
 
-            // Create scales
-            const x = d3.scaleBand()
-            .range([0, width])
-            .domain(data.map(d => d.date))
-            .padding(0.01);
+    // Define the data for the heatmap using the processed perfumes
+    const data = perfumes.map(perfume => ({
+        date: perfume.name, // or whatever property you want to use for x
+        valueRange: perfume.y, // y-axis value
+        value: perfume.scores.oriental // or whatever score you want to visualize
+    }));
 
-            const y = d3.scaleBand()
-            .range([height, 0])
-            .domain(data.map(d => d.valueRange))
-            .padding(0.01);
+    const margin = {top: 30, right: 30, bottom: 50, left: 50};
+    const width = 600 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
 
-            const colorScale = d3.scaleSequential()
-            .interpolator(d3.interpolateYlOrRd)
-            .domain([0, d3.max(data, d => d.value)]);
+    const svg = d3.select("#heatmap")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
 
-            // Create the heatmap rectangles
-            svg.selectAll()
-            .data(data)
-            .enter()
-            .append("rect")
-                .attr("x", d => x(d.date))
-                .attr("y", d => y(d.valueRange))
-                .attr("width", x.bandwidth())
-                .attr("height", y.bandwidth())
-                .style("fill", d => colorScale(d.value));
+    // Create scales
+    const x = d3.scaleBand()
+        .range([0, width])
+        .domain(data.map(d => d.date))
+        .padding(0.01);
 
-            // Add axes
-            svg.append("g")
-            .attr("transform", `translate(0,${height})`)
-            .call(d3.axisBottom(x));
+    const y = d3.scaleBand()
+        .range([height, 0])
+        .domain(data.map(d => d.valueRange))
+        .padding(0.01);
 
-            svg.append("g")
-            .call(d3.axisLeft(y));
+    const colorScale = d3.scaleSequential()
+        .interpolator(d3.interpolateYlOrRd)
+        .domain([0, d3.max(data, d => d.value)]);
 
-            // Add a legend (simplified)
-            const legend = svg.append("g")
-            .attr("transform", `translate(${width + 20}, 0)`);
+    // Create the heatmap rectangles
+    svg.selectAll()
+        .data(data)
+        .enter()
+        .append("rect")
+            .attr("x", d => x(d.date))
+            .attr("y", d => y(d.valueRange))
+            .attr("width", x.bandwidth())
+            .attr("height", y.bandwidth())
+            .style("fill", d => colorScale(d.value));
 
-            legend.selectAll()
-            .data(colorScale.ticks(6).slice(1))
-            .enter()
-            .append("rect")
-                .attr("y", (d, i) => i * 20)
-                .attr("width", 20)
-                .attr("height", 20)
-                .style("fill", colorScale);
-            
-            
+    // Add axes
+    svg.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x));
+
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    // Add a legend (simplified)
+    const legend = svg.append("g")
+        .attr("transform", `translate(${width + 20}, 0)`);
+
+    legend.selectAll()
+        .data(colorScale.ticks(6).slice(1))
+        .enter()
+        .append("rect")
+            .attr("y", (d, i) => i * 20)
+            .attr("width", 20)
+            .attr("height", 20)
+            .style("fill", colorScale);
 });
+
         </script>
     </body>
 </html>
