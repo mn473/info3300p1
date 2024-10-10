@@ -9,29 +9,52 @@
 
         <script>
             // d3.csv("../amanda/vanessa_chart/filtered_top_10_scents.csv").then(function(data) {})
-            Promise.all([d3.csv("scent_categories.csv"), d3.csv("filtered_top_10_scents.csv")]).then(([categories, perfumes]) => {
+            Promise.all([d3.csv("scent_categories.csv"), d3.csv("filtered_top_10_scents.csv")]).then(([categoriesData, perfumes]) => {
+            
+            let categories = {};
+
+            categoriesData.forEach(row => {
+                // Make sure the category is in lowercase for uniform comparison
+                const category = row.category.trim().toLowerCase();
+                const notes = row.notes.split(',').map(note => note.trim().toLowerCase());
+
+                // Assign to the categories object
+                categories[category] = notes;
+            });
+
+// Now categories should look like:
+// {
+//    oriental: ["vanilla", "cinnamon", "amber"],
+//    floral: ["rose", "jasmine", "lily"],
+//    woody: ["cedarwood", "sandalwood", "patchouli"],
+//    fresh: ["citrus", "bergamot", "sea_breeze"]
+// }
 
             perfumes.forEach(perfume => {
-                let notes = (perfume.middle_note).toLowerCase().split(",");
-                perfume.scores = {
-                    oriental: 0,
-                    floral: 0,
-                    woody: 0,
-                    fresh: 0
-                };
-                
-                // update score if perfume has a note in scent category
-                notes.forEach(note => {
-                    for (let category in categories) {
-                        if (categories[category].some(keyword => note.includes(keyword))) {
-                        perfume.scores[category]++; }
-                    }
-                });
+            let notes = (perfume.middle_note).toLowerCase().split(",");
+            perfume.scores = {
+                oriental: 0,
+                floral: 0,
+                woody: 0,
+                fresh: 0
+            };
 
-                // calculate (x, y) position for quadrant chart
-                perfume.x = perfume.scores.oriental - perfume.scores.floral;
-                perfume.y = perfume.scores.fresh - perfume.scores.woody;
+            // Update score if perfume has a note in scent category
+            notes.forEach(note => {
+                note = note.trim().toLowerCase();  // Trim and convert to lowercase for matching
+                for (let category in categories) {
+                    if (categories[category].some(keyword => note.includes(keyword))) {
+                        perfume.scores[category]++;
+                    }
+                }
             });
+console.log(perfumes)
+            // Calculate (x, y) position for quadrant chart
+            perfume.x = perfume.scores.oriental - perfume.scores.floral;
+            perfume.y = perfume.scores.fresh - perfume.scores.woody;
+});
+
+              
             
             const svg = d3.select('svg#fqchart');
             const width = svg.attr('width');
@@ -46,11 +69,11 @@
 
             const x = d3.scaleLinear()
                 .domain(d3.extent(perfumes, d => d.x))
-                .range([margin.left, width - margin.right]);
+                .range([margins.left, width - margins.right]);
 
             const y = d3.scaleLinear()
                 .domain(d3.extent(perfumes, d => d.y))
-                .range([height - margin.bottom, margin.top]);
+                .range([height - margins.bottom, margins.top]);
 
             // axes
             svg.append("g")
@@ -61,15 +84,26 @@
                 .attr("transform", `translate(${width/2},0)`)
                 .call(d3.axisLeft(y));
 
-            // Add perfume points
-            svg.selectAll("circle")
-                .data(perfumes)
-                .enter().append("circle")
-                .attr("cx", d => x(d.x))
-                .attr("cy", d => y(d.y))
-                .attr("r", 5)
-                .attr("fill", "steelblue");
+            // // Add perfume points
+            // svg.selectAll("circle")
+            //     .data(perfumes)
+            //     .enter().append("circle")
+            //     .attr("cx", d => x(d.x))
+            //     .attr("cy", d => y(d.y))
+            //     .attr("r", 5)
+            //     .attr("fill", "steelblue");
+            function jitter(value) {
+    return value + (Math.random() - 0.5) * 0.1; // Add random value between -0.05 and 0.05
+}
 
+// Use jittered x and y values when plotting
+svg.selectAll("circle")
+    .data(perfumes)
+    .enter().append("circle")
+    .attr("cx", d => x(jitter(d.x)))
+    .attr("cy", d => y(jitter(d.y)))
+    .attr("r", 5)
+    .attr("fill", "steelblue");
             // Add labels
             svg.append("text")
                 .attr("x", width)
