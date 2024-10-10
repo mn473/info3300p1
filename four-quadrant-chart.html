@@ -9,7 +9,7 @@
 
         <script>
             // d3.csv("../amanda/vanessa_chart/filtered_top_10_scents.csv").then(function(data) {})
-            Promise.all([d3.csv("../scent-categories.csv"), d3.csv("../filtered_top_10_scents.csv")]).then(([categories, perfumes]) => {
+            Promise.all([d3.csv("scent_categories.csv"), d3.csv("filtered_top_10_scents.csv")]).then(([categories, perfumes]) => {
 
             perfumes.forEach(perfume => {
                 let notes = (perfume.base_note + "," + perfume.middle_note).toLowerCase().split(",");
