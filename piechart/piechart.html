@@ -1,4 +1,8 @@
 <html>
+<!-- PieChart references: 
+  https://dataviz.unhcr.org/tools/d3/d3_donut_chart.html
+  https://d3js.org/d3-shape/pie#_pie
+  https://observablehq.com/@d3/d3-group  -->
 
 <head>
   <title>Pie Chart - Perfume Data</title>
@@ -35,15 +39,16 @@
       margin-top: 50px;
       margin-bottom: -20px;
     }
+
     #label {
-    position: absolute;
-    top: 100px;
-    right: 10%;
-    margin:0px;
-    padding: 0px;
-    font-size: 16px;
-    pointer-events: none; 
-  }
+      position: absolute;
+      top: 100px;
+      right: 10%;
+      margin: 0px;
+      padding: 0px;
+      font-size: 16px;
+      pointer-events: none;
+    }
   </style>
 </head>
 
@@ -136,22 +141,23 @@
           .on("mouseover", function (event, d) {
             let title = d.data.scent + ": " + d.data.count;
             d3.select("#label").text(title);
-                d3.select(this)
-                    .transition()
-                    .duration(100)
-                    .attr("stroke", "black")
-                    .attr("stroke-width",3)
-                    .attr("opacity", .8);
-                    
-            })
-            .on("mouseout", function () {
-                d3.select(this)
-                    .transition()
-                    .duration(100)
-                    .attr("stroke", "none")
-                    .attr("stroke-width", 0)
-                    .attr("opacity", 1);
-                    d3.select("#label").text("")});
+            d3.select(this)
+              .transition()
+              .duration(100)
+              .attr("stroke", "black")
+              .attr("stroke-width", 3)
+              .attr("opacity", .8);
+
+          })
+          .on("mouseout", function () {
+            d3.select(this)
+              .transition()
+              .duration(100)
+              .attr("stroke", "none")
+              .attr("stroke-width", 0)
+              .attr("opacity", 1);
+            d3.select("#label").text("")
+          });
 
         svg.append("text")
           .attr("class", "chart-title")
