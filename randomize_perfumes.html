@@ -7,19 +7,27 @@
 </head>
 <body>
     <script>
-        function samplePerfumes(data) {
-            const filteredPerfumes = data.filter(item => item.scents_group && item.middle_note);
+        d3.json("filtered_top_8_scents.json").then(function(data) {
+            const groupedPerfumes = data.reduce((acc, item) => {
+                if (item['scents_group'] && item['middle_note']) { // Ensure both scents_group and middle_note are present
+                    if (!acc[item['scents_group']]) { acc[item['scents_group']] = []; }
+                    acc[item['scents_group']].push(item);
+                }
+                return acc;
+            }, {});
 
-            const shuffledPerfumes = filteredPerfumes.sort(() => 0.5 - Math.random());
-
-            const sampledPerfumes = shuffledPerfumes.slice(0, 100);
-
+            const sampledPerfumes = {};
+            for (const group in groupedPerfumes) {
+                if (groupedPerfumes.hasOwnProperty(group)) {
+                    const perfumes = groupedPerfumes[group];
+                    // shuffle
+                    const shuffled = perfumes.sort(() => 0.5 - Math.random());
+                    sampledPerfumes[group] = shuffled.slice(0, 14); // Take the first 14 perfumes, aromatic only has 14
+                }
+            }
             console.log('Sampled Perfumes:', sampledPerfumes);
             return sampledPerfumes;
-        }
-        data = d3.json('filtered_top_8_scents.json');
-        console.log(data);
-        samplePerfumes(data);
+        });
     </script>
 </body>
 </html>
