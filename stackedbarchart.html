@@ -84,6 +84,9 @@
                      .call(d3.axisBottom(xScale))
                      .selectAll('text')
                      .style('text-anchor', 'end')
+                     .style("font-family", "Courier New, serif")
+                     .style("font-weight", "bold")
+                     .style("font-size", "14px")
                      .attr('dx', '-7px')
                      .attr('dy', '10px')
                      .attr('transform', 'rotate(-40)');
@@ -94,8 +97,8 @@
 
             const color = d3.scaleOrdinal()
                 .domain(topNotes)
-                .range(["#f5ebe0", "#c1121f", "#ffc2d1", "#e9edc9", "#cdb4db", "#fec89a", "#9f86c0", "#fcca46", 
-                "#adc178", "#fff0f3", "#3d348b", "#9d8189", "#edeec9", "#c08552", "#a63c06", "#710000"]);
+                .range(["#f5ebe0", "#c1121f", "#ffc2d1", "#ffe6a7", "#cdb4db", "#fb8b24", "#9f86c0", "#fcca46", 
+                "#adc178", "#d8e2dc", "#3d348b", "#9d8189", "#dde5b6", "#c08552", "#a63c06", "#710000"]);
 
             const stackedDataForD3 = d3.stack()
                 .keys(topNotes)
@@ -114,13 +117,14 @@
                 .attr("y", d => yScale(d[1]))
                 .attr("height", d => yScale(d[0]) - yScale(d[1]))
                 .attr("width", xScale.bandwidth())
-                .attr("stroke", "grey");
+                // .attr("stroke", "lightgrey");
             chartArea.append('text')
                     .attr('x', chartWidth / 2)
                     .attr('y', chartHeight + margins.bottom - 10)
                     .attr('text-anchor', 'middle')
                     .attr('font-size', '16px')
                     .attr('font-weight', 'bold')
+                    .style("font-family", "Courier New, serif")
                     .text('Scents');
             chartArea.append('text')
                      .attr('transform', 'rotate(-90)')
@@ -129,6 +133,7 @@
                      .attr('text-anchor', 'middle')
                      .attr('font-size', '16px')
                      .attr('font-weight', 'bold')
+                     .style("font-family", "Courier New, serif")
                      .text('Proportion of Middle Notes (%)');
             
             const noteLegend = d3.select("#notelegend");
@@ -142,8 +147,9 @@
 
                 noteLegend.append("span")
                     .text(note)
-                    .style("margin-right", "15px")
-                    .style("font-size", "15px");
+                    .style("margin-right", "20px")
+                    .style("font-size", "15px")
+                    .style("font-family", "Courier New, serif");
             });
     });
     </script>
