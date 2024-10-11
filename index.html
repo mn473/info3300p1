@@ -560,7 +560,7 @@
     <h3>How much of each middle note is used in each perfume scent category?</h3>
     <svg id="stackedchart" width="1400" height="700"></svg>
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
-    <div id="notelegend"
+    <div id="middlenotelegend"
       style="width: 900px; margin: 20px auto; justify-content: center; display: flex; flex-wrap: wrap; row-gap: 15px;">
     </div>
 
@@ -694,16 +694,16 @@
           .style("font-family", "Courier New, serif")
           .text('Proportion of Middle Notes (%)');
 
-        const noteLegend = d3.select("#notelegend");
+        const middlenoteLegend = d3.select("#middlenotelegend");
         topNotes.forEach(note => {
-          noteLegend.append("span")
+          middlenoteLegend.append("span")
             .style("display", "inline-block")
             .style("width", "30px")
             .style("height", "20px")
             .style("background-color", color(note))
             .style("margin-right", "8px");
 
-          noteLegend.append("span")
+          middlenoteLegend.append("span")
             .text(note)
             .style("margin-right", "20px")
             .style("font-size", "15px")
@@ -722,7 +722,7 @@
     <h3>How much of each base note is used in each perfume scent category?</h3>
     <svg id="stackedchart2" width="1400" height="700"></svg>
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
-    <div id="notelegend"
+    <div id="basenotelegend"
       style="width: 900px; margin: 20px auto; justify-content: center; display: flex; flex-wrap: wrap; row-gap: 15px;">
     </div>
 
@@ -856,18 +856,18 @@
           .style("font-family", "Courier New, serif")
           .text('Proportion of Base Notes (%)');
 
-        const noteLegend = d3.select("#notelegend");
+        const basenoteLegend = d3.select("#basenotelegend");
         topNotes.forEach(note => {
-          noteLegend.append("span")
+          basenoteLegend.append("span")
             .style("display", "inline-block")
             .style("width", "30px")
             .style("height", "20px")
             .style("background-color", color(note))
             .style("margin-right", "8px");
 
-          noteLegend.append("span")
+          basenoteLegend.append("span")
             .text(note)
-            .style("margin-right", "20px")
+            .style("margin-right", "30px")
             .style("font-size", "15px")
             .style("font-family", "Courier New, serif");
         });
