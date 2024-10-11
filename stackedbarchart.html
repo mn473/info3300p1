@@ -113,6 +113,21 @@
                 .attr("height", d => yScale(d[0]) - yScale(d[1]))
                 .attr("width", xScale.bandwidth())
                 .attr("stroke", "grey");
+            chartArea.append('text')
+                    .attr('x', chartWidth / 2)
+                    .attr('y', chartHeight + margins.bottom - 10)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '16px')
+                    .attr('font-weight', 'bold')
+                    .text('Scents');
+            chartArea.append('text')
+                     .attr('transform', 'rotate(-90)')
+                     .attr('x', -chartHeight / 2)
+                     .attr('y', -margins.left + 40)
+                     .attr('text-anchor', 'middle')
+                     .attr('font-size', '16px')
+                     .attr('font-weight', 'bold')
+                     .text('Proportion of Middle Notes (%)');
     });
     </script>
 </body>
