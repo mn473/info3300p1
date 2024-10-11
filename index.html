@@ -5,7 +5,7 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
-      font-family: 'Courier New', serif;
+      font-family: 'Tahoma', "sans-serif";
       margin: 0;
       padding: 0;
     }
@@ -46,7 +46,7 @@
     }
 
     #box-h3 {
-      font-family: 'Courier New', serif;
+      font-family: 'Tahoma', serif;
       font-size: 24px;
       text-align: center;
     }
@@ -58,7 +58,7 @@
     }
 
     #box-legend {
-      font-family: 'Courier New', serif;
+      font-family: 'Tahoma', serif;
       margin-left: 350px;
     }
 
@@ -277,7 +277,7 @@
     </div>
 
     <h3>Perfumes Price vs Scent Groups by Bottle Size</h3>
-    <svg id="chart" height="700" width="1300" style="font-family: 'Courier New', serif;"></svg>
+    <svg id="chart" height="700" width="1300" style="font-family: 'Tahoma', serif;"></svg>
     <div id="legend"></div>
 
     <script>
@@ -357,7 +357,7 @@
             .selectAll("text")
             .style("text-anchor", "middle")
             .style("font-size", "16px")
-            .style("font-family", "Courier New, serif");
+            .style("font-family", "Tahoma, serif");
 
           svg.append("text")
             .attr("x", width / 2)
@@ -377,7 +377,6 @@
             .attr("font-size", "16px")
             .style("font-weight", "bold")
             .attr("transform", "rotate(-90)")
-            // .text("Price (New Price)");
             .text("Price After Sale (Dollars)");
 
           for (let i = 1; i < sortedScentGroups.length; i++) {
@@ -490,12 +489,19 @@
               .attr("fill", "#fff8bc")
               .attr("stroke", "black")
               .attr("stroke-width", 1.5);
+            svg.append("rect")
+              .attr("x", xPos + 5)  
+              .attr("y", y(avgPrice) - 35)  
+              .attr("width", 65)  
+              .attr("height", 20)  
+              .attr("fill", "white")  
+              .attr("stroke", "black")
+              .attr("opacity",.85);  
 
             svg.append("text")
               .attr("x", xPos + 10)
-              .attr("y", y(avgPrice) - 5)
-              .attr("font-size", "16px")
-              .attr("font-weight", "bold")
+              .attr("y", y(avgPrice) - 20)
+              .attr("font-size", "16px")              
               .text(`$${avgPrice.toFixed(2)}`);
           });
 
@@ -647,7 +653,7 @@
         chartArea.append('g')
           .attr('class', 'y axis')
           .call(d3.axisLeft(yScale))
-          .style("font-family", "Courier New, serif")
+          .style("font-family", "Tahoma")
           .style("font-size", "14px")
           .style("font-weight", "bold");
 
@@ -680,7 +686,7 @@
         .call(d3.axisBottom(xScale))
         .selectAll('text')
         .style('text-anchor', 'end')
-        .style("font-family", "Courier New, serif")
+        .style("font-family", "Tahoma")
         .style("font-weight", "bold")
         .style("font-size", "14px")
         .attr('dx', '-7px')
@@ -693,7 +699,7 @@
           .attr('text-anchor', 'middle')
           .attr('font-size', '16px')
           .attr('font-weight', 'bold')
-          .style("font-family", "Courier New, serif")
+          .style("font-family", "Tahoma")
           .text('Scents');
         chartArea.append('text')
           .attr('transform', 'rotate(-90)')
@@ -702,7 +708,7 @@
           .attr('text-anchor', 'middle')
           .attr('font-size', '16px')
           .attr('font-weight', 'bold')
-          .style("font-family", "Courier New, serif")
+          .style("font-family", "Tahoma")
           .text('Proportion of Middle Notes (%)');
 
         const middlenoteLegend = d3.select("#middlenotelegend");
@@ -718,7 +724,7 @@
             .text(note)
             .style("margin-right", "20px")
             .style("font-size", "15px")
-            .style("font-family", "Courier New, serif");
+            .style("font-family", "Tahoma");
         });
       });
     </script>
@@ -811,7 +817,7 @@
         chartAreab.append('g')
           .attr('class', 'y axis')
           .call(d3.axisLeft(yScale))
-          .style("font-family", "Courier New, serif")
+          .style("font-family", "Tahoma")
           .style("font-size", "14px")
           .style("font-weight", "bold");
 
@@ -844,7 +850,7 @@
         .call(d3.axisBottom(xScale))
         .selectAll('text')
         .style('text-anchor', 'end')
-        .style("font-family", "Courier New, serif")
+        .style("font-family", "Tahoma")
         .style("font-weight", "bold")
         .style("font-size", "14px")
         .attr('dx', '-7px')
@@ -857,7 +863,7 @@
           .attr('text-anchor', 'middle')
           .attr('font-size', '16px')
           .attr('font-weight', 'bold')
-          .style("font-family", "Courier New, serif")
+          .style("font-family", "Tahoma")
           .text('Scents');
         chartAreab.append('text')
           .attr('transform', 'rotate(-90)')
@@ -866,7 +872,7 @@
           .attr('text-anchor', 'middle')
           .attr('font-size', '16px')
           .attr('font-weight', 'bold')
-          .style("font-family", "Courier New, serif")
+          .style("font-family", "Tahoma")
           .text('Proportion of Base Notes (%)');
 
         const basenoteLegend = d3.select("#basenotelegend");
@@ -882,7 +888,7 @@
             .text(note)
             .style("margin-right", "30px")
             .style("font-size", "15px")
-            .style("font-family", "Courier New, serif");
+            .style("font-family", "Tahoma");
         });
       });
     </script>
