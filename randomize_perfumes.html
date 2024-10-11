@@ -7,47 +7,19 @@
 </head>
 <body>
     <script>
-        function samplePerfumesFromCSV(data) {
-            data = String(data);
-            console.log(data);
-            const lines = data.split('\n');
-            const headers = lines[0].split(',');
+        function samplePerfumes(data) {
+            const filteredPerfumes = data.filter(item => item.scents_group && item.middle_note);
 
-            console.log(lines);
+            const shuffledPerfumes = filteredPerfumes.sort(() => 0.5 - Math.random());
 
-            let perfumes = [];
-            for (let i = 1; i < lines.length; i++) {
-                const row = lines[i].split(',');
-                const obj = {};
-                headers.forEach((header, index) => {
-                    obj[header.trim()] = row[index] ? row[index].trim() : "";
-                });
-                // Filter by rows where `scents_group` and `middle_note` are not empty
-                if (obj['scents_group'] && obj['middle_note']) {
-                    perfumes.push({
-                        'scents_group': obj['scents_group'],
-                        'middle_note': obj['middle_note']
-                    });
-                }
-            }
-            console.log(perfumes);
-
-            // Random sampling logic: Shuffle and slice the array
-            const shuffledPerfumes = perfumes.sort(() => 0.5 - Math.random());
-
-            // sample 100 perfumes
-            const sampleSize = 100;
-            const sampledPerfumes = shuffledPerfumes.slice(0, sampleSize);
+            const sampledPerfumes = shuffledPerfumes.slice(0, 100);
 
             console.log('Sampled Perfumes:', sampledPerfumes);
-
             return sampledPerfumes;
         }
-
-        // Call the function with the CSV content
-        data = d3.csv('filtered_top_8_scents.csv');
+        data = d3.json('filtered_top_8_scents.json');
         console.log(data);
-        samplePerfumesFromCSV(data);
+        samplePerfumes(data);
     </script>
 </body>
 </html>
