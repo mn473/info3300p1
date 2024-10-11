@@ -139,15 +139,19 @@
     <!-- PieChart references: 
       https://dataviz.unhcr.org/tools/d3/d3_donut_chart.html
       https://d3js.org/d3-shape/pie#_pie
-      https://observablehq.com/@d3/d3-group  -->
-    <!-- <h1 id="pie-title">Prominent Scents in Each Department</h1> -->
+      https://observablehq.com/@d3/d3-group 
+      https://developer.mozilla.org/en-US/ -->
 
     <div id="caption">
       <h2>Scents Across Different Departments: Men, Women, & Unisex</h2>
-      <p>Which types of scents are targeted to be more for men or more for women? This chart aims to explore the proportion of scents of the perfumes
-        sold in each of the three different departments during retail. This may be a peek into which smells and notes are traditionally
-        considered masculine, feminine, or androgynous. If there's an overwhelming majority for one specific scent in any of the departments,
-        it could be a sign to shop in that department specifically if they specialize and have a diversity of options in that scent that you prefer.
+      <p>Which types of scents are targeted to be more for men or more for women? This chart aims to explore the
+        proportion of scents of the perfumes
+        sold in each of the three different departments during retail. This may be a peek into which smells and notes
+        are traditionally
+        considered masculine, feminine, or androgynous. If there's an overwhelming majority for one specific scent in
+        any of the departments,
+        it could be a sign to shop in that department specifically if they specialize and have a diversity of options in
+        that scent that you prefer.
       </p>
     </div>
 
@@ -155,7 +159,6 @@
     <svg id="piechart" height="50" width="50"></svg>
 
     <text id="label"></text>
-
 
     <!-- charts for departments -->
     <div id="pie-charts">
@@ -194,7 +197,7 @@
         d3.select("#pie-legend").append("span")
           .style("display", "inline-block")
           .style("width", "20px")
-          .style("height", "10px")
+          .style("height", "15px")
           .style("background-color", color(scent))
           .style("margin-right", "3px");
 
@@ -222,6 +225,11 @@
 
         // create donuts for each department and scents distribution
         function createChart(id, scentsData, department) {
+          // counting, sorting, and calculating for percentage label
+          const pietotal = d3.sum(scentsData, d => d.count);
+          const sortedData = scentsData.sort((a, b) => b.count - a.count);
+          const top7Data = sortedData.slice(0, 7);
+
           //svg
           const svg = d3.select(id)
             .append("svg")
@@ -230,6 +238,7 @@
             .append("g")
             .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
+          // pie slices
           svg.selectAll('path')
             .data(pie(scentsData))
             .join('path')
@@ -238,6 +247,24 @@
             .attr("stroke", "#ffffff")
             .style("stroke-width", "2px");
 
+          svg.selectAll("text")
+            .data(pie(scentsData))
+            .join("text")
+            .attr("transform", d => `translate(${arc.centroid(d)})`)
+            .attr("dy", "0.35em")
+            .attr("text-anchor", "middle")
+            .attr("font-size", d => {
+              const isinTop7 = top7Data.some(topScent => topScent.scent === d.data.scent);
+              // check if isinTop6, if not then shrink text size
+              return isinTop7 ? "10px" : "7px";
+            })
+            .attr("fill", "black")
+            .text(d => {
+              const percent = (d.data.count / pietotal * 100).toFixed(1);
+              return `${percent}%`;
+            });
+
+          // center department text
           svg.append("text")
             .attr("class", "chart-title")
             .attr("text-anchor", "middle")
@@ -270,9 +297,11 @@
   <div id="boxplot-data">
     <div id="caption">
       <h2>Correlation between perfume price and its scent and department</h2>
-      <p>Are there differences between how much a floral perfume is priced compared to an oriental perfume, or a floral perfume for 
+      <p>Are there differences between how much a floral perfume is priced compared to an oriental perfume, or a floral
+        perfume for
         the mens department, compared to a floral perffume for the womens department?
-        Variations in price may indicate a bias in demand and marketing, and preference for certain types scents over others.
+        Variations in price may indicate a bias in demand and marketing, and preference for certain types scents over
+        others.
       </p>
     </div>
 
@@ -283,254 +312,254 @@
     <script>
       d3.csv('../noon_perfumes_dataset.csv', d3.autoType)
         .then((data) => {
+          data.forEach(d => {
+            d['new_price'] = Number(d['new_price']);
+            d['ml'] = Number(d['ml']);
+          });
+
+          // Use 10 scent groups based on the pivot table analysis and selected any scents with > 10 records
+          //const scentGroups = ['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'];
+          const scentGroups = ['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'];
+          // Use only these 3 departments as "Kids" has only 1 record
+          const departments = ['Unisex', 'Women', 'Men'];
+          // Filter the data to include only specified scent groups and departments
+          data = data.filter(d => scentGroups.includes(d['scents']) && departments.includes(d['department']));
+
+          const scentGroupsWithAvgPrice = [];
+          scentGroups.forEach(group => {
+            let totalPrice = 0;
+            let count = 0;
             data.forEach(d => {
-                d['new_price'] = Number(d['new_price']);
-                d['ml'] = Number(d['ml']);
+              if (d['scents'] == group) {
+                totalPrice += d['new_price'];
+                count += 1;
+              }
             });
+            const avgPrice = totalPrice / count;
+            scentGroupsWithAvgPrice.push({ group, avgPrice });
+          });
 
-            // Use 10 scent groups based on the pivot table analysis and selected any scents with > 10 records
-            //const scentGroups = ['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'];
-            const scentGroups = ['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'];
-            // Use only these 3 departments as "Kids" has only 1 record
-            const departments = ['Unisex', 'Women', 'Men'];
-            // Filter the data to include only specified scent groups and departments
-            data = data.filter(d => scentGroups.includes(d['scents']) && departments.includes(d['department']));
+          scentGroupsWithAvgPrice.sort((a, b) => a.avgPrice - b.avgPrice);
+          const sortedScentGroups = scentGroupsWithAvgPrice.map(d => d['group']);
 
-            const scentGroupsWithAvgPrice = [];
-            scentGroups.forEach(group => {
-                let totalPrice = 0;
-                let count = 0;
-                data.forEach(d => {
-                    if (d['scents'] == group) {
-                        totalPrice += d['new_price'];
-                        count += 1;
-                    }
-                });
-                const avgPrice = totalPrice / count;
-                scentGroupsWithAvgPrice.push({ group, avgPrice });
-            });
+          const margin = { top: 30, right: 30, bottom: 90, left: 60 };
+          const width = 1500 - margin.left - margin.right;
+          const height = 700 - margin.top - margin.bottom;
+          const svg = d3.select("svg#chart")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
 
-            scentGroupsWithAvgPrice.sort((a, b) => a.avgPrice - b.avgPrice);
-            const sortedScentGroups = scentGroupsWithAvgPrice.map(d => d['group']);
+          // Source: https://d3js.org/d3-scale/band
+          const x = d3.scaleBand()
+            .domain(sortedScentGroups)
+            .range([0, width])
+            .paddingInner(0.1);
 
-            const margin = {top: 30, right: 30, bottom: 90, left: 60};
-            const width = 1500 - margin.left - margin.right;
-            const height = 700 - margin.top - margin.bottom;
-            const svg = d3.select("svg#chart")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", `translate(${margin.left},${margin.top})`);
+          const y = d3.scaleLinear()
+            .domain([0, 900])
+            .range([height, 0]);
 
-            // Source: https://d3js.org/d3-scale/band
-            const x = d3.scaleBand()
-                .domain(sortedScentGroups)
-                .range([0, width])
-                .paddingInner(0.1);
+          svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x))
+            .selectAll("text")
+            .style("text-anchor", "middle")
+            .style("font-size", "16px");
 
-            const y = d3.scaleLinear()
-                .domain([0, 900])
-                .range([height, 0]);
+          svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", height + 50)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "16px")
+            .style("font-weight", "bold")
+            .text("Scent Group");
 
-            svg.append("g")
-                .attr("transform", `translate(0,${height})`)
-                .call(d3.axisBottom(x))
-                .selectAll("text")
-                .style("text-anchor", "middle")
-                .style("font-size", "16px");
+          svg.append("g")
+            .call(d3.axisLeft(y).tickFormat(d3.format("$~s")));
 
-            svg.append("text")
-                .attr("x", width / 2)
-                .attr("y", height + 50)
-                .attr("text-anchor", "middle")
-                .attr("font-size", "16px")
-                .style("font-weight", "bold")
-                .text("Scent Group");
+          svg.append("text")
+            .attr("x", -height / 2)
+            .attr("y", -40)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "16px")
+            .style("font-weight", "bold")
+            .attr("transform", "rotate(-90)")
+            .text("Price After Sale (Dollars)");
 
-            svg.append("g")
-                .call(d3.axisLeft(y).tickFormat(d3.format("$~s")));
+          for (let i = 1; i < sortedScentGroups.length; i++) {
+            const currentGroup = x(sortedScentGroups[i]);
+            const previousGroup = x(sortedScentGroups[i - 1]);
+            const mid = (currentGroup + previousGroup + x.bandwidth()) / 2;
 
-            svg.append("text")
-                .attr("x", -height / 2)
-                .attr("y", -40)
-                .attr("text-anchor", "middle")
-                .attr("font-size", "16px")
-                .style("font-weight", "bold")
-                .attr("transform", "rotate(-90)")
-                .text("Price After Sale (Dollars)");
+            svg.append("line")
+              .attr("class", "grid-line")
+              .attr("x1", mid)
+              .attr("x2", mid)
+              .attr("y1", 0)
+              .attr("y2", height);
+          }
 
-            for (let i = 1; i < sortedScentGroups.length; i++) {
-                const currentGroup = x(sortedScentGroups[i]);
-                const previousGroup = x(sortedScentGroups[i - 1]);
-                const mid = (currentGroup + previousGroup + x.bandwidth()) / 2;
+          const colorScaleDept = d3.scaleOrdinal()
+            .domain(departments)
+            .range(d3.schemeRdPu[3]);
+
+          // Source: https://d3-graph-gallery.com/graph/boxplot_basic.html
+          const boxWidth = x.bandwidth() / 3;
+
+          sortedScentGroups.forEach(group => {
+            const groupData = data.filter(d => d['scents'] == group);
+
+            let index = 0;
+            departments.forEach(department => {
+              const deptData = groupData.filter(d => d['department'] === department);
+              if (deptData.length > 0) {
+
+                const sortedPrices = deptData.map(d => d['new_price']).sort(d3.ascending);
+                // Calculate quartiles
+                const q1 = d3.quantile(sortedPrices, 0.25);
+                const median = d3.quantile(sortedPrices, 0.5);
+                const q3 = d3.quantile(sortedPrices, 0.75);
+                const interQuantileRange = q3 - q1;
+                const min = d3.max([0, q1 - 1.5 * interQuantileRange]);
+                const max = d3.min([900, q3 + 1.5 * interQuantileRange]);
+
+                const xPos = x(group) + index * boxWidth;
+                index++;
+
+                // Draw the box
+                svg.append("rect")
+                  .attr("x", xPos)
+                  .attr("y", y(q3))
+                  .attr("width", boxWidth)
+                  .attr("height", y(q1) - y(q3))
+                  .attr("stroke", "black")
+                  .attr("fill", colorScaleDept(department));
+
+                // Draw the median
+                svg.append("line")
+                  .attr("x1", xPos)
+                  .attr("x2", xPos + boxWidth)
+                  .attr("y1", y(median))
+                  .attr("y2", y(median))
+                  .attr("stroke", "black");
+
+                // Draw the min/max lines
+                svg.append("line")
+                  .attr("x1", xPos + boxWidth / 2)
+                  .attr("x2", xPos + boxWidth / 2)
+                  .attr("y1", y(min))
+                  .attr("y2", y(q1))
+                  .attr("stroke", "black");
 
                 svg.append("line")
-                .attr("class", "grid-line")
-                .attr("x1", mid)
-                .attr("x2", mid)
-                .attr("y1", 0)
-                .attr("y2", height);
-            }
+                  .attr("x1", xPos + boxWidth / 2)
+                  .attr("x2", xPos + boxWidth / 2)
+                  .attr("y1", y(q3))
+                  .attr("y2", y(max))
+                  .attr("stroke", "black");
 
-            const colorScaleDept = d3.scaleOrdinal()
-                        .domain(departments)
-                        .range(d3.schemeRdPu[3]); 
+                // Add the min/max whiskers
+                svg.append("line")
+                  .attr("x1", xPos)
+                  .attr("x2", xPos + boxWidth)
+                  .attr("y1", y(min))
+                  .attr("y2", y(min))
+                  .attr("stroke", "black");
 
-            // Source: https://d3-graph-gallery.com/graph/boxplot_basic.html
-            const boxWidth = x.bandwidth() / 3;
+                svg.append("line")
+                  .attr("x1", xPos)
+                  .attr("x2", xPos + boxWidth)
+                  .attr("y1", y(max))
+                  .attr("y2", y(max))
+                  .attr("stroke", "black");
 
-            sortedScentGroups.forEach(group => {
-                const groupData = data.filter(d => d['scents'] == group);
-
-                let index = 0;
-                departments.forEach(department => {
-                    const deptData = groupData.filter(d => d['department'] === department);
-                    if (deptData.length > 0) {
-
-                        const sortedPrices = deptData.map(d => d['new_price']).sort(d3.ascending);
-                        // Calculate quartiles
-                        const q1 = d3.quantile(sortedPrices, 0.25);
-                        const median = d3.quantile(sortedPrices, 0.5);
-                        const q3 = d3.quantile(sortedPrices, 0.75);
-                        const interQuantileRange = q3 - q1;
-                        const min = d3.max([0, q1 - 1.5 * interQuantileRange]);
-                        const max = d3.min([900, q3 + 1.5 * interQuantileRange]);
-
-                        const xPos = x(group) + index * boxWidth;
-                        index++;
-
-                        // Draw the box
-                        svg.append("rect")
-                            .attr("x", xPos)
-                            .attr("y", y(q3))
-                            .attr("width", boxWidth)
-                            .attr("height", y(q1) - y(q3))
-                            .attr("stroke", "black")
-                            .attr("fill", colorScaleDept(department));
-
-                        // Draw the median
-                        svg.append("line")
-                            .attr("x1", xPos)
-                            .attr("x2", xPos + boxWidth)
-                            .attr("y1", y(median))
-                            .attr("y2", y(median))
-                            .attr("stroke", "black");
-
-                        // Draw the min/max lines
-                        svg.append("line")
-                            .attr("x1", xPos + boxWidth / 2)
-                            .attr("x2", xPos + boxWidth / 2)
-                            .attr("y1", y(min))
-                            .attr("y2", y(q1))
-                            .attr("stroke", "black");
-
-                        svg.append("line")
-                            .attr("x1", xPos + boxWidth / 2)
-                            .attr("x2", xPos + boxWidth / 2)
-                            .attr("y1", y(q3))
-                            .attr("y2", y(max))
-                            .attr("stroke", "black");
-
-                        // Add the min/max whiskers
-                        svg.append("line")
-                            .attr("x1", xPos)
-                            .attr("x2", xPos + boxWidth)
-                            .attr("y1", y(min))
-                            .attr("y2", y(min))
-                            .attr("stroke", "black");
-
-                        svg.append("line")
-                            .attr("x1", xPos)
-                            .attr("x2", xPos + boxWidth)
-                            .attr("y1", y(max))
-                            .attr("y2", y(max))
-                            .attr("stroke", "black");
-
-                        // Draw outliers as red circles
-                        deptData.forEach(d => {
-                            if (d['new_price'] < min || d['new_price'] > max) {
-                                svg.append("circle")
-                                    .attr("cx", xPos + boxWidth / 2)
-                                    .attr("cy", y(d['new_price']))
-                                    .attr("r", 3)
-                                    .attr("fill", "red");
-                            }
-                        });
-                    }
+                // Draw outliers as red circles
+                deptData.forEach(d => {
+                  if (d['new_price'] < min || d['new_price'] > max) {
+                    svg.append("circle")
+                      .attr("cx", xPos + boxWidth / 2)
+                      .attr("cy", y(d['new_price']))
+                      .attr("r", 3)
+                      .attr("fill", "red");
+                  }
                 });
+              }
             });
+          });
 
-            scentGroupsWithAvgPrice.forEach(d => {
-                const group = d['group'];
-                const avgPrice = d['avgPrice'];
+          scentGroupsWithAvgPrice.forEach(d => {
+            const group = d['group'];
+            const avgPrice = d['avgPrice'];
 
-                const xPos = x(group) + x.bandwidth() / 2;
+            const xPos = x(group) + x.bandwidth() / 2;
 
-                svg.append("circle")
-                .attr("cx", xPos)
-                .attr("cy", y(avgPrice))
-                .attr("r", 6)
-                .attr("fill", "#fff8bc")
-                .attr("stroke", "black")
-                .attr("stroke-width", 1.5);
+            svg.append("circle")
+              .attr("cx", xPos)
+              .attr("cy", y(avgPrice))
+              .attr("r", 6)
+              .attr("fill", "#fff8bc")
+              .attr("stroke", "black")
+              .attr("stroke-width", 1.5);
 
-                svg.append("rect")
-                .attr("x", xPos + 5)  
-                .attr("y", y(avgPrice) - 35)  
-                .attr("width", 65)  
-                .attr("height", 20)  
-                .attr("fill", "white")  
-                .attr("stroke", "black")
-                .attr("opacity",.85);  
+            svg.append("rect")
+              .attr("x", xPos + 5)
+              .attr("y", y(avgPrice) - 35)
+              .attr("width", 65)
+              .attr("height", 20)
+              .attr("fill", "white")
+              .attr("stroke", "black")
+              .attr("opacity", .85);
 
-                svg.append("text")
-                .attr("x", xPos + 10)
-                .attr("y", y(avgPrice) - 20)
-                .attr("font-size", "16px")              
-                .text(`$${avgPrice.toFixed(2)}`);
-            });
+            svg.append("text")
+              .attr("x", xPos + 10)
+              .attr("y", y(avgPrice) - 20)
+              .attr("font-size", "16px")
+              .text(`$${avgPrice.toFixed(2)}`);
+          });
 
-            // Legends
-            departments.forEach(department => {
-                d3.select("#legend").append("div")
-                    .style("display", "inline-block")
-                    .style("background-color", colorScaleDept(department))
-                    .style("width", "40px")
-                    .style("height", "20px")
-                    .style("margin-right", "5px");
-
-                d3.select("#legend").append("span")
-                    .text(department)
-                    .style("margin-right", "20px")
-                    .style("font-size", "14px");
-            });
-
+          // Legends
+          departments.forEach(department => {
             d3.select("#legend").append("div")
-                .style("display", "inline-block")
-                .style("width", "12px")
-                .style("height", "12px")
-                .style("background-color", "#fff8bc")
-                .style("border", "1.5px solid black")
-                .style("border-radius", "50%")
-                .style("margin-left", "20px");
+              .style("display", "inline-block")
+              .style("background-color", colorScaleDept(department))
+              .style("width", "40px")
+              .style("height", "20px")
+              .style("margin-right", "5px");
 
             d3.select("#legend").append("span")
-                .text("Average Price")
-                .style("margin-left", "10px")
-                .style("font-size", "14px");
+              .text(department)
+              .style("margin-right", "20px")
+              .style("font-size", "14px");
+          });
 
-            d3.select("#legend").append("div")
-                .style("display", "inline-block")
-                .style("width", "7px")
-                .style("height", "7px")
-                .style("background-color", "red")
-                .style("border-radius", "50%")
-                .style("margin-left", "20px");
+          d3.select("#legend").append("div")
+            .style("display", "inline-block")
+            .style("width", "12px")
+            .style("height", "12px")
+            .style("background-color", "#fff8bc")
+            .style("border", "1.5px solid black")
+            .style("border-radius", "50%")
+            .style("margin-left", "20px");
 
-            d3.select("#legend").append("span")
-                .text("Outlier")
-                .style("margin-left", "10px")
-                .style("font-size", "14px");
+          d3.select("#legend").append("span")
+            .text("Average Price")
+            .style("margin-left", "10px")
+            .style("font-size", "14px");
+
+          d3.select("#legend").append("div")
+            .style("display", "inline-block")
+            .style("width", "7px")
+            .style("height", "7px")
+            .style("background-color", "red")
+            .style("border-radius", "50%")
+            .style("margin-left", "20px");
+
+          d3.select("#legend").append("span")
+            .text("Outlier")
+            .style("margin-left", "10px")
+            .style("font-size", "14px");
         });
     </script>
   </div>
@@ -539,9 +568,12 @@
     <div id="caption">
       <h2>Middle notes in the scent families</h2>
       <p>
-        We pulled the top 15 most frequently occurring middle notes out of all the perfumes, and calculated how much they appear
-        in each of 7 scent groups. The greater the total proportion of the scent group, the more that the top 15 middle notes are
-        used, as opposed to less popular notes. Additionally, we can see just how many perfumes have each of the 15 middle notes out
+        We pulled the top 15 most frequently occurring middle notes out of all the perfumes, and calculated how much
+        they appear
+        in each of 7 scent groups. The greater the total proportion of the scent group, the more that the top 15 middle
+        notes are
+        used, as opposed to less popular notes. Additionally, we can see just how many perfumes have each of the 15
+        middle notes out
         of each scent group!
       </p>
     </div>
@@ -651,19 +683,19 @@
           .attr("y", d => yScale(d[1]))
           .attr("height", d => yScale(d[0]) - yScale(d[1]))
           .attr("width", xScale.bandwidth());
-        
+
         chartArea.append('g')
-        .attr('class', 'x axis')
-        .attr('transform', `translate(0, ${chartHeight})`)
-        .call(d3.axisBottom(xScale))
-        .selectAll('text')
-        .style('text-anchor', 'end')
-        .style("font-family", "Tahoma")
-        .style("font-weight", "bold")
-        .style("font-size", "14px")
-        .attr('dx', '-7px')
-        .attr('dy', '10px')
-        .attr('transform', 'rotate(-40)');
+          .attr('class', 'x axis')
+          .attr('transform', `translate(0, ${chartHeight})`)
+          .call(d3.axisBottom(xScale))
+          .selectAll('text')
+          .style('text-anchor', 'end')
+          .style("font-family", "Tahoma")
+          .style("font-weight", "bold")
+          .style("font-size", "14px")
+          .attr('dx', '-7px')
+          .attr('dy', '10px')
+          .attr('transform', 'rotate(-40)');
 
         chartArea.append('text')
           .attr('x', chartWidth / 2)
@@ -705,9 +737,12 @@
   <div id="basenote-data">
     <div id="caption">
       <h2>Base notes in the scent families</h2>
-      <p>Following the same idea as before, we pulled the top 15 most frequently occurring base notes out of all the perfumes
-        and calculated how much they appear in each of 7 scent groups. How much variation in note use is there between each scent group?
-        Which scent group's perfumes have a smaller share of popular notes, thus leaving more variation in less common notes?
+      <p>Following the same idea as before, we pulled the top 15 most frequently occurring base notes out of all the
+        perfumes
+        and calculated how much they appear in each of 7 scent groups. How much variation in note use is there between
+        each scent group?
+        Which scent group's perfumes have a smaller share of popular notes, thus leaving more variation in less common
+        notes?
       </p>
     </div>
     <h3>How much do the 15 most common base notes take up in different perfume scents?</h3>
@@ -796,7 +831,7 @@
         const color = d3.scaleOrdinal()
           .domain(topNotes)
           .range(["#ddbea8", "#ee9b00", "#99582a", "#9d8189", "#e2ece9", "#ee6c4d", "#a7c957",
-          "#003049", "#2b9348", "#432818", "#e7c6ff", "#9e2a2b", "#ffe6a7", "#2ec4b6", "#5f0f40", "#014f86"]);
+            "#003049", "#2b9348", "#432818", "#e7c6ff", "#9e2a2b", "#ffe6a7", "#2ec4b6", "#5f0f40", "#014f86"]);
 
         const stackedDataForD3 = d3.stack()
           .keys(topNotes)
@@ -817,17 +852,17 @@
           .attr("width", xScale.bandwidth());
 
         chartAreab.append('g')
-        .attr('class', 'x axis')
-        .attr('transform', `translate(0, ${chartHeightb})`)
-        .call(d3.axisBottom(xScale))
-        .selectAll('text')
-        .style('text-anchor', 'end')
-        .style("font-family", "Tahoma")
-        .style("font-weight", "bold")
-        .style("font-size", "14px")
-        .attr('dx', '-7px')
-        .attr('dy', '10px')
-        .attr('transform', 'rotate(-40)');
+          .attr('class', 'x axis')
+          .attr('transform', `translate(0, ${chartHeightb})`)
+          .call(d3.axisBottom(xScale))
+          .selectAll('text')
+          .style('text-anchor', 'end')
+          .style("font-family", "Tahoma")
+          .style("font-weight", "bold")
+          .style("font-size", "14px")
+          .attr('dx', '-7px')
+          .attr('dy', '10px')
+          .attr('transform', 'rotate(-40)');
 
         chartAreab.append('text')
           .attr('x', chartWidthb / 2)
