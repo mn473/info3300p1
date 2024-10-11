@@ -57,6 +57,10 @@
 
 <body>
   <div id="piechart-data">
+    <!-- PieChart references: 
+      https://dataviz.unhcr.org/tools/d3/d3_donut_chart.html
+      https://d3js.org/d3-shape/pie#_pie
+      https://observablehq.com/@d3/d3-group  -->
     <h1 id="pie-title">Prominent Scents in Each Department</h1>
     <svg id="piechart" height="50" width="50"></svg>
 
@@ -142,26 +146,6 @@
             .attr('fill', d => color(d.data.scent))
             .attr("stroke", "#ffffff")
             .style("stroke-width", "2px");
-          // .on("mouseover", function (event, d) {
-          //   let title = d.data.scent + ": " + d.data.count;
-          //   d3.select("#label").text(title);
-          //   d3.select(this)
-          //     .transition()
-          //     .duration(100)
-          //     .attr("stroke", "black")
-          //     .attr("stroke-width", 3)
-          //     .attr("opacity", .8);
-
-          // })
-          // .on("mouseout", function () {
-          //   d3.select(this)
-          //     .transition()
-          //     .duration(100)
-          //     .attr("stroke", "none")
-          //     .attr("stroke-width", 0)
-          //     .attr("opacity", 1);
-          //   d3.select("#label").text("")
-          // });
 
           svg.append("text")
             .attr("class", "chart-title")
