@@ -137,6 +137,7 @@
           .attr('d', arc)
           .attr('fill', d => color(d.data.scent))
           .attr("stroke", "#ffffff")
+<<<<<<< Updated upstream
           .style("stroke-width", "2px");
         // .on("mouseover", function (event, d) {
         //   let title = d.data.scent + ": " + d.data.count;
@@ -158,6 +159,29 @@
         //     .attr("opacity", 1);
         //   d3.select("#label").text("")
         // });
+=======
+          .style("stroke-width", "2px")
+          // interactivity commented out because not allowed
+          // .on("mouseover", function (event, d) {
+          //   let title = d.data.scent + ": " + d.data.count;
+          //   d3.select("#label").text(title);
+          //       d3.select(this)
+          //           .transition()
+          //           .duration(100)
+          //           .attr("stroke", "black")
+          //           .attr("stroke-width",3)
+          //           .attr("opacity", .8);
+                    
+          //   })
+          //   .on("mouseout", function () {
+          //       d3.select(this)
+          //           .transition()
+          //           .duration(100)
+          //           .attr("stroke", "none")
+          //           .attr("stroke-width", 0)
+          //           .attr("opacity", 1);
+          //           d3.select("#label").text("")});
+>>>>>>> Stashed changes
 
         svg.append("text")
           .attr("class", "chart-title")
