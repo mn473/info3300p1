@@ -174,7 +174,8 @@
       // changed so prettier colors
       const color = d3.scaleOrdinal()
         .domain(['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'])
-        .range(['#2E86C1', '#9B59B6', '#C0392B', '#F1C40F', '#28B463', '#BDC3C7', '#2E4053', '#DA23C1', '#EDBB99', '#76D7C4']);
+        // .range(['#2E86C1', '#9B59B6', '#C0392B', '#F1C40F', '#28B463', '#BDC3C7', '#2E4053', '#DA23C1', '#EDBB99', '#76D7C4']);
+        .range(d3.schemeSet3);
 
       // legend
       const scentsLegend = color.domain();
@@ -552,12 +553,12 @@
 
   <div id="middlenote-data">
     <div id="caption">
-      <h2>TITLE TODO</h2>
+      <h2>Middle notes in the scent families</h2>
       <p>DESCRIPTION TODO
       </p>
     </div>
 
-    <h3>How much of each middle note is used in each perfume scent category?</h3>
+    <h3>How much do the 15 most common middle notes take up in different perfume scents?</h3>
     <svg id="stackedchart" width="1400" height="700"></svg>
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
     <div id="middlenotelegend"
@@ -634,19 +635,6 @@
           .range([chartHeight, 0]);
 
         chartArea.append('g')
-          .attr('class', 'x axis')
-          .attr('transform', `translate(0, ${chartHeight})`)
-          .call(d3.axisBottom(xScale))
-          .selectAll('text')
-          .style('text-anchor', 'end')
-          .style("font-family", "Courier New, serif")
-          .style("font-weight", "bold")
-          .style("font-size", "14px")
-          .attr('dx', '-7px')
-          .attr('dy', '10px')
-          .attr('transform', 'rotate(-40)');
-
-        chartArea.append('g')
           .attr('class', 'y axis')
           .call(d3.axisLeft(yScale))
           .style("font-family", "Courier New, serif")
@@ -674,8 +662,21 @@
           .attr("x", d => xScale(d.data.scent))
           .attr("y", d => yScale(d[1]))
           .attr("height", d => yScale(d[0]) - yScale(d[1]))
-          .attr("width", xScale.bandwidth())
-        // .attr("stroke", "lightgrey");
+          .attr("width", xScale.bandwidth());
+        
+        chartArea.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', `translate(0, ${chartHeight})`)
+        .call(d3.axisBottom(xScale))
+        .selectAll('text')
+        .style('text-anchor', 'end')
+        .style("font-family", "Courier New, serif")
+        .style("font-weight", "bold")
+        .style("font-size", "14px")
+        .attr('dx', '-7px')
+        .attr('dy', '10px')
+        .attr('transform', 'rotate(-40)');
+
         chartArea.append('text')
           .attr('x', chartWidth / 2)
           .attr('y', chartHeight + margins.bottom - 10)
@@ -715,11 +716,11 @@
 
   <div id="basenote-data">
     <div id="caption">
-      <h2>TITLE TODO</h2>
+      <h2>Base notes in the scent families</h2>
       <p>DESCRIPTION TODO
       </p>
     </div>
-    <h3>How much of each base note is used in each perfume scent category?</h3>
+    <h3>How much do the 15 most common middle notes take up in different perfume scents?</h3>
     <svg id="stackedchart2" width="1400" height="700"></svg>
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
     <div id="basenotelegend"
@@ -796,19 +797,6 @@
           .range([chartHeightb, 0]);
 
         chartAreab.append('g')
-          .attr('class', 'x axis')
-          .attr('transform', `translate(0, ${chartHeightb})`)
-          .call(d3.axisBottom(xScale))
-          .selectAll('text')
-          .style('text-anchor', 'end')
-          .style("font-family", "Courier New, serif")
-          .style("font-weight", "bold")
-          .style("font-size", "14px")
-          .attr('dx', '-7px')
-          .attr('dy', '10px')
-          .attr('transform', 'rotate(-40)');
-
-        chartAreab.append('g')
           .attr('class', 'y axis')
           .call(d3.axisLeft(yScale))
           .style("font-family", "Courier New, serif")
@@ -817,8 +805,8 @@
 
         const color = d3.scaleOrdinal()
           .domain(topNotes)
-          .range(["#f5ebe0", "#c1121f", "#ffc2d1", "#ffe6a7", "#cdb4db", "#fb8b24", "#9f86c0", "#fcca46",
-            "#adc178", "#d8e2dc", "#3d348b", "#9d8189", "#dde5b6", "#c08552", "#a63c06", "#710000"]);
+          .range(["#ddbea8", "#ee9b00", "#99582a", "#9d8189", "#e2ece9", "#ee6c4d", "#a7c957",
+          "#003049", "#2b9348", "#432818", "#e7c6ff", "#9e2a2b", "#ffe6a7", "#2ec4b6", "#5f0f40", "#014f86"]);
 
         const stackedDataForD3 = d3.stack()
           .keys(topNotes)
@@ -836,8 +824,21 @@
           .attr("x", d => xScale(d.data.scent))
           .attr("y", d => yScale(d[1]))
           .attr("height", d => yScale(d[0]) - yScale(d[1]))
-          .attr("width", xScale.bandwidth())
-        // .attr("stroke", "lightgrey");
+          .attr("width", xScale.bandwidth());
+
+        chartAreab.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', `translate(0, ${chartHeightb})`)
+        .call(d3.axisBottom(xScale))
+        .selectAll('text')
+        .style('text-anchor', 'end')
+        .style("font-family", "Courier New, serif")
+        .style("font-weight", "bold")
+        .style("font-size", "14px")
+        .attr('dx', '-7px')
+        .attr('dy', '10px')
+        .attr('transform', 'rotate(-40)');
+
         chartAreab.append('text')
           .attr('x', chartWidthb / 2)
           .attr('y', chartHeightb + marginsb.bottom - 10)
