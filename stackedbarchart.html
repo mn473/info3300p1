@@ -54,6 +54,7 @@
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 16)
                 .map(entry => entry[0]);
+            console.log(topNotes);
 
             let scents = Array.from(new Set(data.map(d => d['scents_group']))).slice(0, 10);
 
@@ -92,8 +93,8 @@
 
             const color = d3.scaleOrdinal()
                 .domain(topNotes)
-                .range(["#DDADAD", "#ECD2D1", "#FBFBFB", "#B6C5CA", "#C7C0B6", "#B8AAA7", "#A5BBD3", "#F3DBCF", 
-                "#C9BBC8", "#CAC093", "#8795A0", "#71677c", "#ddbea8", "#b8bedd", "#e0afa0"]);
+                .range(["#f5ebe0", "#c1121f", "#ffc2d1", "#e9edc9", "#cdb4db", "#fec89a", "#9f86c0", "#fcca46", 
+                "#adc178", "#fff0f3", "#3d348b", "#9d8189", "#edeec9", "#c08552", "#a63c06", "#710000"]);
 
             const stackedDataForD3 = d3.stack()
                 .keys(topNotes)
