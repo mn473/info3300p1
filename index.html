@@ -722,7 +722,11 @@
     <h3>How much of each base note is used in each perfume scent category?</h3>
     <svg id="stackedchart2" width="1400" height="700"></svg>
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
+<<<<<<< HEAD
     <div id="basenotelegend"
+=======
+    <div id="notelegend2"
+>>>>>>> 4e6c8372831227f2ef4b97180bc2e9afb44bfbb4
       style="width: 900px; margin: 20px auto; justify-content: center; display: flex; flex-wrap: wrap; row-gap: 15px;">
     </div>
 
@@ -856,7 +860,11 @@
           .style("font-family", "Courier New, serif")
           .text('Proportion of Base Notes (%)');
 
+<<<<<<< HEAD
         const basenoteLegend = d3.select("#basenotelegend");
+=======
+        const noteLegend = d3.select("#notelegend2");
+>>>>>>> 4e6c8372831227f2ef4b97180bc2e9afb44bfbb4
         topNotes.forEach(note => {
           basenoteLegend.append("span")
             .style("display", "inline-block")
