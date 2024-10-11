@@ -1,0 +1,456 @@
+<html>
+
+<head>
+  <title>Perfume Dataset</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    h3 {
+      font-family: 'Arial', sans-serif;
+      font-size: 24px;
+      margin-left: 400px;
+    }
+
+    .grid-line {
+      stroke: gray;
+      stroke-width: 2px;
+      stroke-dasharray: 4;
+    }
+
+    #legend {
+      font-family: 'Arial', sans-serif;
+      margin-left: 350px;
+    }
+
+    #pie-charts {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 50px;
+      margin-top: 0px;
+    }
+
+    #men-pie {
+      margin: 10px;
+    }
+
+    #women-pie {
+      margin: 10px;
+    }
+
+    #unisex-pie {
+      margin: 10px;
+    }
+
+    #pie-legend {
+      text-align: center;
+    }
+
+    #pie-title {
+      text-align: center;
+      font-size: 25px;
+      font-weight: bold;
+      margin-top: 50px;
+      margin-bottom: -20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="piechart-data">
+    <h1 id="pie-title">Prominent Scents in Each Department</h1>
+    <svg id="piechart" height="50" width="50"></svg>
+
+    <text id="label"></text>
+
+
+    <!-- charts for departments -->
+    <div id="pie-charts">
+      <div id="men-pie"></div>
+      <div id="women-pie"></div>
+      <div id="unisex-pie"></div>
+    </div>
+
+    <div id="pie-legend"></div>
+
+    <script>
+      const margin = 20;
+      const width = 200;
+      const height = 200;
+
+      const radius = Math.min(width, height) / 2;
+      const innerRadius = radius * 0.3;
+
+      // changed so prettier colors
+      const color = d3.scaleOrdinal()
+        .domain(['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'])
+        .range(['#2E86C1', '#9B59B6', '#C0392B', '#F1C40F', '#28B463', '#BDC3C7', '#2E4053', '#DA23C1', '#EDBB99', '#76D7C4']);
+
+      // legend
+      const scentsLegend = color.domain();
+
+      d3.select("#pie-legend")
+        .append("span")
+        .text("Scents: ")
+        .style("font-weight", "bold")
+        .style("font-size", "14px")
+        .style("margin-right", "15px");
+
+      scentsLegend.forEach(scent => {
+        d3.select("#pie-legend").append("span")
+          .style("display", "inline-block")
+          .style("width", "20px")
+          .style("height", "10px")
+          .style("background-color", color(scent))
+          .style("margin-right", "3px");
+
+        d3.select("#pie-legend").append("span")
+          .text(scent)
+          .style("margin-right", "15px")
+          .style("font-size", "14px");
+      });
+
+
+      // furthering filtering data
+      d3.csv('filtered_top_10_scents.csv').then(data => {
+
+        data.forEach(d => {
+          d.department = d.department.trim();
+          d.scents = d.scents.trim();
+        });
+
+        // grouping by department/scents and counting (result is a map)
+        const scentDistribution = d3.rollups(data, v => v.length, d => d.department, d => d.scents);
+
+        // setting up donut chart sizing
+        const pie = d3.pie().value(d => d.count);
+        const arc = d3.arc().innerRadius(innerRadius).outerRadius(radius);
+
+        // create donuts for each department and scents distribution
+        function createChart(id, scentsData, department) {
+          //svg
+          const svg = d3.select(id)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+          svg.selectAll('path')
+            .data(pie(scentsData))
+            .join('path')
+            .attr('d', arc)
+            .attr('fill', d => color(d.data.scent))
+            .attr("stroke", "#ffffff")
+            .style("stroke-width", "2px");
+          // .on("mouseover", function (event, d) {
+          //   let title = d.data.scent + ": " + d.data.count;
+          //   d3.select("#label").text(title);
+          //   d3.select(this)
+          //     .transition()
+          //     .duration(100)
+          //     .attr("stroke", "black")
+          //     .attr("stroke-width", 3)
+          //     .attr("opacity", .8);
+
+          // })
+          // .on("mouseout", function () {
+          //   d3.select(this)
+          //     .transition()
+          //     .duration(100)
+          //     .attr("stroke", "none")
+          //     .attr("stroke-width", 0)
+          //     .attr("opacity", 1);
+          //   d3.select("#label").text("")
+          // });
+
+          svg.append("text")
+            .attr("class", "chart-title")
+            .attr("text-anchor", "middle")
+            .attr("dy", 5)
+            .attr("font-size", "15px")
+            .text(department);
+        }
+
+        // men
+        // finds men department from scentDistribution mapping and gets scent count too
+        const menScentData = scentDistribution.find(d => d[0] === "Men")[1];
+        // creates a new array in format for pie
+        const menData = menScentData.map(([scent, count]) => ({ scent, count }));
+        createChart('#men-pie', menData, 'Men');
+
+        // women 
+        const womenScentData = scentDistribution.find(d => d[0] === "Women")[1];
+        const womenData = womenScentData.map(([scent, count]) => ({ scent, count }));
+        createChart('#women-pie', womenData, 'Women');
+
+        // unisex
+        const unisexScentData = scentDistribution.find(d => d[0] === "Unisex")[1];
+        const unisexData = unisexScentData.map(([scent, count]) => ({ scent, count }));
+        createChart('#unisex-pie', unisexData, 'Unisex');
+
+      });
+    </script>
+  </div>
+  <h3>Perfumes Price vs Scent Groups by Bottle Size</h3>
+  <svg id="chart" height="700" width="1500"></svg>
+  <div id="legend"></div>
+
+  <script>
+    d3.csv('../noon_perfumes_dataset.csv', d3.autoType)
+      .then((data) => {
+        data.forEach(d => {
+          d['new_price'] = Number(d['new_price']);
+          d['ml'] = Number(d['ml']);
+        }
+        );
+
+        // Source: https://www.ukpackchina.com/perfume-bottle-sizes/
+        function getSizeLabel(ml) {
+          if (ml < 50)
+            return 'Small';
+          else if (ml >= 50 && ml < 90)
+            return 'Medium';
+          else if (ml >= 90 && ml < 120)
+            return 'Large';
+          else
+            return 'Extra Large';
+        }
+
+        data.forEach(d => {
+          d.bottle_size = getSizeLabel(d.ml)
+        });
+
+        const scentGroups = [];
+        data.forEach(d => {
+          if (!scentGroups.includes(d.scents_group)) {
+            scentGroups.push(d.scents_group);
+          }
+        });
+
+        const scentGroupsWithAvgPrice = [];
+        scentGroups.forEach(group => {
+          let totalPrice = 0;
+          let count = 0;
+          data.forEach(d => {
+            if (d.scents_group == group) {
+              totalPrice += d['new_price'];
+              count += 1;
+            }
+          });
+          const avgPrice = totalPrice / count;
+          scentGroupsWithAvgPrice.push({ group, avgPrice });
+        });
+
+        for (let i = 0; i < scentGroupsWithAvgPrice.length; i++) {
+          for (let j = 0; j < scentGroupsWithAvgPrice.length - 1; j++) {
+            if (scentGroupsWithAvgPrice[j].avgPrice > scentGroupsWithAvgPrice[j + 1].avgPrice) {
+              let temp = scentGroupsWithAvgPrice[j];
+              scentGroupsWithAvgPrice[j] = scentGroupsWithAvgPrice[j + 1];
+              scentGroupsWithAvgPrice[j + 1] = temp;
+            }
+          }
+        }
+        const sortedScentGroups = scentGroupsWithAvgPrice.map(d => d.group);
+
+        const margin = { top: 30, right: 30, bottom: 90, left: 60 };
+        const width = 1500 - margin.left - margin.right;
+        const height = 700 - margin.top - margin.bottom;
+        const svg = d3.select("svg#chart")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Source: https://d3js.org/d3-scale/band
+        const x = d3.scaleBand()
+          .domain(sortedScentGroups)
+          .range([0, width])
+          .paddingInner(0.1);
+
+        const y = d3.scaleLinear()
+          .domain([0, 600])
+          .range([height, 0]);
+
+        svg.append("g")
+          .attr("transform", `translate(0,${height})`)
+          .call(d3.axisBottom(x))
+          .selectAll("text")
+          .style("text-anchor", "middle")
+          .style("font-size", "16px");
+
+        svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", height + 50)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "16px")
+          .style("font-weight", "bold")
+          .text("Scent Group");
+
+        svg.append("g")
+          .call(d3.axisLeft(y).tickFormat(d3.format("$~s")));
+
+        svg.append("text")
+          .attr("x", -height / 2)
+          .attr("y", -40)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "16px")
+          .style("font-weight", "bold")
+          .attr("transform", "rotate(-90)")
+          .text("Price (New Price)");
+
+        for (let i = 1; i < sortedScentGroups.length; i++) {
+          const currentGroup = x(sortedScentGroups[i]);
+          const previousGroup = x(sortedScentGroups[i - 1]);
+          const mid = (currentGroup + previousGroup + x.bandwidth()) / 2;
+
+          svg.append("line")
+            .attr("class", "grid-line")
+            .attr("x1", mid)
+            .attr("x2", mid)
+            .attr("y1", 0)
+            .attr("y2", height);
+        }
+
+        const bottleSizes = ['Small', 'Medium', 'Large', 'Extra Large'];
+        const colorScaleSize = d3.scaleOrdinal()
+          .domain(bottleSizes)
+          .range(["#e78ac3", "#fc8d62", "#0096FF", "#1b9e77"]);
+
+        // Source: https://d3-graph-gallery.com/graph/boxplot_basic.html
+        const boxWidth = x.bandwidth() / 5;
+
+        sortedScentGroups.forEach(group => {
+          const groupData = data.filter(d => d.scents_group == group);
+
+          let index = 0;
+          bottleSizes.forEach(size => {
+            const sizeData = groupData.filter(d => d.bottle_size == size);
+            if (sizeData.length > 0) {
+
+              const sortedPrices = sizeData.map(d => d.new_price).sort(d3.ascending);
+              const data_sorted = data.sort(d3.ascending)
+              const q1 = d3.quantile(sortedPrices, 0.25);
+              const median = d3.quantile(sortedPrices, 0.5);
+              const q3 = d3.quantile(sortedPrices, 0.75);
+              const interQuantileRange = q3 - q1;
+              const min = d3.max([0, q1 - 1.5 * interQuantileRange]);
+              const max = d3.min([900, q3 + 1.5 * interQuantileRange]);
+
+              const xPos = x(group) + index * boxWidth;
+              index++;
+
+              svg.append("rect")
+                .attr("x", xPos)
+                .attr("y", y(q3))
+                .attr("width", boxWidth)
+                .attr("height", y(q1) - y(q3))
+                .attr("stroke", "black")
+                .attr("fill", colorScaleSize(size));
+
+              svg.append("line")
+                .attr("x1", xPos)
+                .attr("x2", xPos + boxWidth)
+                .attr("y1", y(median))
+                .attr("y2", y(median))
+                .attr("stroke", "black");
+
+              svg.append("line")
+                .attr("x1", xPos + boxWidth / 2)
+                .attr("x2", xPos + boxWidth / 2)
+                .attr("y1", y(min))
+                .attr("y2", y(q1))
+                .attr("stroke", "black");
+
+              svg.append("line")
+                .attr("x1", xPos + boxWidth / 2)
+                .attr("x2", xPos + boxWidth / 2)
+                .attr("y1", y(q3))
+                .attr("y2", y(max))
+                .attr("stroke", "black");
+
+              svg.append("line")
+                .attr("x1", xPos)
+                .attr("x2", xPos + boxWidth)
+                .attr("y1", y(min))
+                .attr("y2", y(min))
+                .attr("stroke", "black");
+
+              svg.append("line")
+                .attr("x1", xPos)
+                .attr("x2", xPos + boxWidth)
+                .attr("y1", y(max))
+                .attr("y2", y(max))
+                .attr("stroke", "black");
+            }
+          });
+        });
+
+        scentGroupsWithAvgPrice.forEach(d => {
+          const group = d['group'];
+          const avgPrice = d['avgPrice'];
+
+          const xPos = x(group) + x.bandwidth() / 2;
+
+          svg.append("circle")
+            .attr("cx", xPos)
+            .attr("cy", y(avgPrice))
+            .attr("r", 6)
+            .attr("fill", "yellow")
+            .attr("stroke", "black")
+            .attr("stroke-width", 1.5);
+
+          svg.append("text")
+            .attr("x", xPos + 10)
+            .attr("y", y(avgPrice) - 5)
+            .attr("font-size", "12px")
+            .attr("font-weight", "bold")
+            .text(`$${avgPrice.toFixed(2)}`);
+        });
+
+        bottleSizes.forEach(size => {
+          let sizeLabel = '';
+
+          if (size === 'Small') {
+            sizeLabel = 'Small (<50ML)';
+          } else if (size === 'Medium') {
+            sizeLabel = 'Medium (50-90ML)';
+          } else if (size === 'Large') {
+            sizeLabel = 'Large (90-120ML)';
+          } else if (size === 'Extra Large') {
+            sizeLabel = 'Extra Large (>=120ML)';
+          }
+
+          d3.select("#legend").append("div")
+            .style("display", "inline-block")
+            .style("background-color", colorScaleSize(size))
+            .style("width", "40px")
+            .style("height", "20px")
+            .style("margin-right", "5px");
+
+          d3.select("#legend").append("span")
+            .text(sizeLabel)
+            .style("margin-right", "20px")
+            .style("font-size", "14px");
+        });
+
+        d3.select("#legend").append("div")
+          .style("display", "inline-block")
+          .style("width", "12px")
+          .style("height", "12px")
+          .style("background-color", "yellow")
+          .style("border", "1.5px solid black")
+          .style("border-radius", "50%")
+          .style("margin-left", "20px");
+
+        d3.select("#legend").append("span")
+          .text("Average Price")
+          .style("margin-left", "10px")
+          .style("font-size", "14px");
+
+      });
+  </script>
+  <div id="boxplot-data">
+
+  </div>
+
+</body>
