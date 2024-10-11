@@ -179,7 +179,7 @@
 
       // changed so prettier colors
       const color = d3.scaleOrdinal()
-        .domain(['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'])
+        .domain(['Floral', 'Woody', 'Spicy', 'Fruity', 'Fresh', 'Oriental', 'Aromatic'])
         // .range(['#2E86C1', '#9B59B6', '#C0392B', '#F1C40F', '#28B463', '#BDC3C7', '#2E4053', '#DA23C1', '#EDBB99', '#76D7C4']);
         .range(d3.schemeSet3);
 
@@ -209,7 +209,7 @@
 
 
       // furthering filtering data
-      d3.csv('filtered_top_10_scents.csv').then(data => {
+      d3.csv('filtered_top_7_scents.csv').then(data => {
 
         data.forEach(d => {
           d.department = d.department.trim();
@@ -228,7 +228,7 @@
           // counting, sorting, and calculating for percentage label
           const pietotal = d3.sum(scentsData, d => d.count);
           const sortedData = scentsData.sort((a, b) => b.count - a.count);
-          const top7Data = sortedData.slice(0, 7);
+          const top6Data = sortedData.slice(0, 6);
 
           //svg
           const svg = d3.select(id)
@@ -254,9 +254,9 @@
             .attr("dy", "0.35em")
             .attr("text-anchor", "middle")
             .attr("font-size", d => {
-              const isinTop7 = top7Data.some(topScent => topScent.scent === d.data.scent);
+              const isinTop6 = top6Data.some(topScent => topScent.scent === d.data.scent);
               // check if isinTop6, if not then shrink text size
-              return isinTop7 ? "10px" : "7px";
+              return isinTop6 ? "10px" : "9px";
             })
             .attr("fill", "black")
             .text(d => {
@@ -319,7 +319,7 @@
 
           // Use 10 scent groups based on the pivot table analysis and selected any scents with > 10 records
           //const scentGroups = ['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'];
-          const scentGroups = ['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'];
+          const scentGroups = ['Floral', 'Woody', 'Spicy', 'Fruity', 'Fresh', 'Oriental', 'Aromatic'];
           // Use only these 3 departments as "Kids" has only 1 record
           const departments = ['Unisex', 'Women', 'Men'];
           // Filter the data to include only specified scent groups and departments
