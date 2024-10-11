@@ -1,11 +1,11 @@
 <html>
 <head>
-    <title>Top 20 Middle Notes per Scent Group</title>
+    <title>Top 15 Middle Notes per Scent Group</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-    <h3>Top 20 Middle Notes per Scent Group</h3>
-    <svg id="stackedchart" width="800" height="600"></svg>
+    <h3>Top 15 Middle Notes per Scent Group</h3>
+    <svg id="stackedchart" width="1400" height="700"></svg>
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
 
     <script>
@@ -20,29 +20,25 @@
     const chartArea = svg.append('g')
         .attr('transform', `translate(${margins.left}, ${margins.top})`);
 
-    d3.csv("filtered_top_10_scents.csv").then(function(data) {
-        data = data.filter(d => d['scents_group'] && d['base_note']);
-        
+    d3.csv("filtered_top_8_scents.csv").then(function(data) {
+        data = data.filter(d => d['scents_group'] && d['middle_note']);
+
         let noteFrequency = {};
 
         data.forEach(d => {
-            let middleNotes = d['base_note'].split(/,|\s+and\s+/i).map(note => note.trim());
+            // clean commas and white space: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trim
+            let middleNotes = d['middle_note'].split(/,|\s+and\s+/i).map(note => note.trim());
             let scent = d['scents_group']; 
 
+            // count number of notes for each scent
             middleNotes.forEach(note => {
-                if (!noteFrequency[note]) {
-                    noteFrequency[note] = {};
-                }
-                
-                if (!noteFrequency[note][scent]) {
-                    noteFrequency[note][scent] = 0;
-                }
-
+                if (!noteFrequency[note]) { noteFrequency[note] = {}; }
+                if (!noteFrequency[note][scent]) { noteFrequency[note][scent] = 0; }
                 noteFrequency[note][scent]++;
             });
         });
 
-        //  top 20 notes by total frequency
+        //  top 10 notes by total frequency
         let totalNoteFrequency = {};
         for (let note in noteFrequency) {
             let totalCount = 0;
@@ -52,9 +48,10 @@
             totalNoteFrequency[note] = totalCount;
         }
 
+        // take top 10 notes for each scent
         let topNotes = Object.entries(totalNoteFrequency)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 20)
+            .slice(0, 10)
             .map(entry => entry[0]);
 
         // top 10 scents
@@ -102,19 +99,20 @@
             .attr("x", chartWidth / 2)
             .attr("y", chartHeight + margins.bottom - 20)
             .attr("text-anchor", "middle")
-            .style("font-size", "16px")
+            .style("font-size", "20px")
             .text("Scent Groups");
 
         // y-axis label
         chartArea.append("text")
             .attr("text-anchor", "middle")
             .attr("transform", `translate(${-margins.left + 20}, ${chartHeight / 2}) rotate(-90)`)
-            .style("font-size", "16px")
+            .style("font-size", "20px")
             .text("Frequency of Middle Notes");
 
         const color = d3.scaleOrdinal()
             .domain(topNotes)
-            .range(d3.schemePastel1);
+            .range(["#d8e2dc", "#ffe5d9", "#ffcad4", "#9d8189", "#fec89a", "#cae9ff", "#dde7c7", "#ed6a5a", 
+            "#eaeaea", "#cbf3f0", "#f7c59f", "#71677c", "#ddbea8", "#b8bedd", "#e0afa0"]);
 
         // stack
         const stackedDataForD3 = d3.stack()
@@ -146,6 +144,8 @@
             });
     
     });
+
+    
 
     </script>
 </body>
