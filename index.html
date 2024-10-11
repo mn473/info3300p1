@@ -717,14 +717,19 @@
 
         const middlenoteLegend = d3.select("#middlenotelegend");
         topNotes.forEach(note => {
-          middlenoteLegend.append("span")
+          const noteSpan = middlenoteLegend.append("span")
+            .style("display", "inline-flex")
+            .style("align-items", "center")
+            .style("margin-right", "8px");
+
+          noteSpan.append("span")
             .style("display", "inline-block")
             .style("width", "30px")
             .style("height", "20px")
             .style("background-color", color(note))
             .style("margin-right", "8px");
 
-          middlenoteLegend.append("span")
+          noteSpan.append("span")
             .text(note)
             .style("margin-right", "20px")
             .style("font-size", "15px")
@@ -884,14 +889,19 @@
 
         const basenoteLegend = d3.select("#basenotelegend");
         topNotes.forEach(note => {
-          basenoteLegend.append("span")
+          const noteSpanbase = basenoteLegend.append("span")
+            .style("display", "inline-flex")
+            .style("align-items", "center")
+            .style("margin-right", "8px");
+
+          noteSpanbase.append("span")
             .style("display", "inline-block")
             .style("width", "30px")
             .style("height", "20px")
             .style("background-color", color(note))
             .style("margin-right", "8px");
 
-          basenoteLegend.append("span")
+          noteSpanbase.append("span")
             .text(note)
             .style("margin-right", "30px")
             .style("font-size", "15px")
