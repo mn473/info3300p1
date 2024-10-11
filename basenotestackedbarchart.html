@@ -1,0 +1,160 @@
+<html>
+<head>
+    <title>Top 15 Base Notes per Scent Group</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <h3>How much of each base note is used in each perfume scent category?</h3>
+    <svg id="stackedchart" width="1400" height="700"></svg>
+    <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
+    <div id="notelegend" style="width: 900px; margin: 20px auto; justify-content: center; display: flex; flex-wrap: wrap; row-gap: 15px;"></div>
+
+    <script>
+        const svg = d3.select('svg#stackedchart');
+        const width = svg.attr('width');
+        const height = svg.attr('height');
+
+        const margins = { top: 20, right: 20, bottom: 100, left: 100 };
+        const chartWidth = width - margins.left - margins.right;
+        const chartHeight = height - margins.top - margins.bottom;
+
+        const chartArea = svg.append('g')
+                             .attr('transform', `translate(${margins.left}, ${margins.top})`);
+
+        d3.json("filtered_top_8_scents.json").then(function(data) {
+            data = data.filter(d => d['scents_group'] && d['base_note']);
+
+            let noteCount = {};
+            let totalNotesPerScent = {};
+
+            data.forEach(d => {
+                let baseNotes = d['base_note'].split(/,|\s+and\s+/i).map(note => note.trim());
+                let scent = d['scents_group'];
+
+                if (!totalNotesPerScent[scent]) { totalNotesPerScent[scent] = 0; }
+                
+                totalNotesPerScent[scent] += baseNotes.length;
+
+                baseNotes.forEach(note => {
+                    if (!noteCount[note]) { noteCount[note] = {}; }
+                    if (!noteCount[note][scent]) { noteCount[note][scent] = 0; }
+                    noteCount[note][scent]++;
+                });
+            });
+
+            let totalNoteCount = {};
+            for (let note in noteCount) {
+                let totalCount = 0;
+                for (let scent in noteCount[note]) {
+                    totalCount += noteCount[note][scent];
+                }
+                totalNoteCount[note] = totalCount;
+            }
+
+            let topNotes = Object.entries(totalNoteCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 16)
+                .map(entry => entry[0]);
+            console.log(topNotes);
+
+            let scents = Array.from(new Set(data.map(d => d['scents_group']))).slice(0, 10);
+
+            let stackedData = [];
+            scents.forEach(scent => {
+                let entry = { scent: scent };
+                topNotes.forEach(note => {
+                    let noteCountForScent = noteCount[note] && noteCount[note][scent] ? noteCount[note][scent] : 0;
+                    entry[note] = (noteCountForScent / totalNotesPerScent[scent]) * 100;
+                });
+                stackedData.push(entry);
+            });
+
+            const xScale = d3.scaleBand()
+                             .domain(scents)
+                             .range([0, chartWidth])
+                             .padding([0.1]);
+
+            const yScale = d3.scaleLinear()
+                             .domain([0, 60])
+                             .range([chartHeight, 0]);
+
+            chartArea.append('g')
+                     .attr('class', 'x axis')
+                     .attr('transform', `translate(0, ${chartHeight})`)
+                     .call(d3.axisBottom(xScale))
+                     .selectAll('text')
+                     .style('text-anchor', 'end')
+                     .style("font-family", "Courier New, serif")
+                     .style("font-weight", "bold")
+                     .style("font-size", "14px")
+                     .attr('dx', '-7px')
+                     .attr('dy', '10px')
+                     .attr('transform', 'rotate(-40)');
+
+            chartArea.append('g')
+                     .attr('class', 'y axis')
+                     .call(d3.axisLeft(yScale))
+                     .style("font-family", "Courier New, serif")
+                     .style("font-size", "14px")
+                     .style("font-weight", "bold");
+
+            const color = d3.scaleOrdinal()
+                .domain(topNotes)
+                .range(["#f5ebe0", "#c1121f", "#ffc2d1", "#ffe6a7", "#cdb4db", "#fb8b24", "#9f86c0", "#fcca46", 
+                "#adc178", "#d8e2dc", "#3d348b", "#9d8189", "#dde5b6", "#c08552", "#a63c06", "#710000"]);
+
+            const stackedDataForD3 = d3.stack()
+                .keys(topNotes)
+                (stackedData);
+
+            chartArea.append("g")
+                .selectAll("g")
+                .data(stackedDataForD3)
+                .enter().append("g")
+                .attr("fill", d => color(d.key))
+                .selectAll("rect")
+                .data(d => d)
+                .enter()
+                .append("rect")
+                .attr("x", d => xScale(d.data.scent))
+                .attr("y", d => yScale(d[1]))
+                .attr("height", d => yScale(d[0]) - yScale(d[1]))
+                .attr("width", xScale.bandwidth())
+                // .attr("stroke", "lightgrey");
+            chartArea.append('text')
+                    .attr('x', chartWidth / 2)
+                    .attr('y', chartHeight + margins.bottom - 10)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', '16px')
+                    .attr('font-weight', 'bold')
+                    .style("font-family", "Courier New, serif")
+                    .text('Scents');
+            chartArea.append('text')
+                     .attr('transform', 'rotate(-90)')
+                     .attr('x', -chartHeight / 2)
+                     .attr('y', -margins.left + 40)
+                     .attr('text-anchor', 'middle')
+                     .attr('font-size', '16px')
+                     .attr('font-weight', 'bold')
+                     .style("font-family", "Courier New, serif")
+                     .text('Proportion of Base Notes (%)');
+            
+            const noteLegend = d3.select("#notelegend");
+            topNotes.forEach(note => {
+                noteLegend.append("span")
+                    .style("display", "inline-block")
+                    .style("width", "30px")
+                    .style("height", "20px")
+                    .style("background-color", color(note))
+                    .style("margin-right", "8px");
+
+                noteLegend.append("span")
+                    .text(note)
+                    .style("margin-right", "20px")
+                    .style("font-size", "15px")
+                    .style("font-family", "Courier New, serif");
+            });
+    });
+    </script>
+</body>
+</html>
