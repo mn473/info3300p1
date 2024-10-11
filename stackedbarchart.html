@@ -93,7 +93,10 @@
 
             chartArea.append('g')
                      .attr('class', 'y axis')
-                     .call(d3.axisLeft(yScale));
+                     .call(d3.axisLeft(yScale))
+                     .style("font-family", "Courier New, serif")
+                     .style("font-size", "14px")
+                     .style("font-weight", "bold");
 
             const color = d3.scaleOrdinal()
                 .domain(topNotes)
