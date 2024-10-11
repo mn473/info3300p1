@@ -7,109 +7,47 @@
 </head>
 <body>
     <script>
-        // Function to handle sampling of perfumes directly from CSV content
-        function samplePerfumesFromCSV(csvData) {
-            // Parse the CSV data
-            const perfumesData = parseCSV(csvData);
+        function samplePerfumesFromCSV(data) {
+            data = String(data);
+            console.log(data);
+            const lines = data.split('\n');
+            const headers = lines[0].split(',');
 
-            // List of scent groups to sample from
-            const scentGroups = ['Aromatic', 'Floral', 'Woody', 'Fruity', 'Fresh', 'Spicy', 'Musk', 'Oriental'];
+            console.log(lines);
 
-            // Group perfumes by scents_group
-            const groupedPerfumes = groupByScentsGroup(perfumesData, 'scents_group', scentGroups);
-
-            // Find the minimum group size across all scent groups
-            const minGroupSize = findMinGroupSize(groupedPerfumes);
-
-            // Randomly sample the same number of perfumes from each scent group
-            const sampledPerfumes = [];
-            for (const group in groupedPerfumes) {
-                sampledPerfumes.push(...randomSample(groupedPerfumes[group], minGroupSize));
+            let perfumes = [];
+            for (let i = 1; i < lines.length; i++) {
+                const row = lines[i].split(',');
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header.trim()] = row[index] ? row[index].trim() : "";
+                });
+                // Filter by rows where `scents_group` and `middle_note` are not empty
+                if (obj['scents_group'] && obj['middle_note']) {
+                    perfumes.push({
+                        'scents_group': obj['scents_group'],
+                        'middle_note': obj['middle_note']
+                    });
+                }
             }
+            console.log(perfumes);
+
+            // Random sampling logic: Shuffle and slice the array
+            const shuffledPerfumes = perfumes.sort(() => 0.5 - Math.random());
+
+            // sample 100 perfumes
+            const sampleSize = 100;
+            const sampledPerfumes = shuffledPerfumes.slice(0, sampleSize);
 
             console.log('Sampled Perfumes:', sampledPerfumes);
 
-            // Return or further process the sampled perfumes as needed
             return sampledPerfumes;
         }
 
-        // Function to parse CSV file manually
-        function parseCSV(data) {
-            const lines = data.split('\n');
-            const headers = lines[0].split(',');
-            const result = [];
-
-            for (let i = 1; i < lines.length; i++) {
-                const obj = {};
-                const currentLine = lines[i].split(',');
-
-                // Skip empty lines
-                if (currentLine.length === 1 && currentLine[0].trim() === "") continue;
-
-                headers.forEach((header, index) => {
-                    obj[header.trim()] = currentLine[index] ? currentLine[index].trim() : "";
-                });
-
-                result.push(obj);
-            }
-
-            return result;
-        }
-
-        // Function to group perfumes by a specified column (scents_group)
-        function groupByScentsGroup(data, groupKey, validGroups) {
-            const grouped = {};
-
-            data.forEach(item => {
-                const groupValue = item[groupKey];
-                if (validGroups.includes(groupValue)) {
-                    if (!grouped[groupValue]) {
-                        grouped[groupValue] = [];
-                    }
-                    grouped[groupValue].push(item);
-                }
-            });
-
-            return grouped;
-        }
-
-        // Function to find the minimum group size across all groups
-        function findMinGroupSize(groupedData) {
-            let minSize = Infinity;
-            for (const group in groupedData) {
-                const groupSize = groupedData[group].length;
-                if (groupSize < minSize) {
-                    minSize = groupSize;
-                }
-            }
-            return minSize;
-        }
-
-        // Function to randomly sample a given number of items from an array
-        function randomSample(array, sampleSize) {
-            const shuffled = array.slice();
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled.slice(0, sampleSize);
-        }
-
-        // Example usage:
-        const csvContent = `
-        number,brand,name,old_price,new_price,ml,concentration,department,scents,base_note,middle_note,item_rating,seller,seller_rating,num_seller_ratings,scents_group
-        1,CARTIER,Pasha de Cartier,290.0,185.25,100,EDT,Men,Aromatic,"Oakmoss, Sandalwood, Patchouli, Labdanum","Coriander, Brazilian Rosewood",4.3,noon,4.2,98.1K,Aromatic
-        2,CHANEL,No.5,450.0,400.0,100,EDP,Women,Floral,"Jasmine, Rose","Ylang Ylang, Iris",4.8,noon,4.7,105.3K,Floral
-        3,DIOR,Sauvage,375.0,320.0,100,EDT,Men,Woody,"Cedar, Sandalwood","Bergamot, Lavender",4.7,noon,4.6,102.9K,Woody
-        4,DOLCE&GABBANA,Light Blue,300.0,250.0,100,EDT,Women,Fruity,"Apple, Lemon","Cedarwood, Bamboo",4.5,noon,4.4,89.5K,Fruity
-        5,HERMES,Terre d'Hermes,350.0,295.0,100,EDT,Men,Fresh,"Orange, Grapefruit","Pepper, Cedar",4.6,noon,4.5,95.0K,Fresh
-        6,YSL,Black Opium,330.0,280.0,100,EDP,Women,Spicy,"Coffee, Vanilla","Orange Blossom, Jasmine",4.7,noon,4.6,100.2K,Spicy
-        7,TOM FORD,White Suede,500.0,450.0,100,EDP,Unisex,Musk,"Suede, Musk","Thyme, Saffron",4.8,noon,4.7,110.3K,Musk
-        8,VERSACE,Eros,350.0,300.0,100,EDT,Men,Oriental,"Tonka Bean, Vanilla","Mint, Lemon",4.7,noon,4.6,104.1K,Oriental
-        `;
-
         // Call the function with the CSV content
-        const sampledPerfumes = d3.csv("filtered_top_8_scents.csv");
+        data = d3.csv('filtered_top_8_scents.csv');
+        console.log(data);
+        samplePerfumesFromCSV(data);
     </script>
 </body>
 </html>
