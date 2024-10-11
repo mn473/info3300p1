@@ -7,6 +7,7 @@
     <h3>Top 15 Middle Notes per Scent Group</h3>
     <svg id="stackedchart" width="1400" height="700"></svg>
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
+    <div id="notelegend" style="width: 900px; margin: 20px auto; justify-content: center; display: flex; flex-wrap: wrap; row-gap: 15px;"></div>
 
     <script>
         const svg = d3.select('svg#stackedchart');
@@ -129,6 +130,21 @@
                      .attr('font-size', '16px')
                      .attr('font-weight', 'bold')
                      .text('Proportion of Middle Notes (%)');
+            
+            const noteLegend = d3.select("#notelegend");
+            topNotes.forEach(note => {
+                noteLegend.append("span")
+                    .style("display", "inline-block")
+                    .style("width", "30px")
+                    .style("height", "20px")
+                    .style("background-color", color(note))
+                    .style("margin-right", "8px");
+
+                noteLegend.append("span")
+                    .text(note)
+                    .style("margin-right", "15px")
+                    .style("font-size", "15px");
+            });
     });
     </script>
 </body>
