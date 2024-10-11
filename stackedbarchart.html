@@ -9,143 +9,111 @@
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
 
     <script>
-    const svg = d3.select('svg#stackedchart');
-    const width = svg.attr('width');
-    const height = svg.attr('height');
+        const svg = d3.select('svg#stackedchart');
+        const width = svg.attr('width');
+        const height = svg.attr('height');
 
-    const margins = { top: 20, right: 20, bottom: 100, left: 100 };
-    const chartWidth = width - margins.left - margins.right;
-    const chartHeight = height - margins.top - margins.bottom;
+        const margins = { top: 20, right: 20, bottom: 100, left: 100 };
+        const chartWidth = width - margins.left - margins.right;
+        const chartHeight = height - margins.top - margins.bottom;
 
-    const chartArea = svg.append('g')
-        .attr('transform', `translate(${margins.left}, ${margins.top})`);
+        const chartArea = svg.append('g')
+                             .attr('transform', `translate(${margins.left}, ${margins.top})`);
 
-    d3.csv("filtered_top_8_scents.csv").then(function(data) {
-        data = data.filter(d => d['scents_group'] && d['middle_note']);
+        d3.json("filtered_top_8_scents.json").then(function(data) {
+            data = data.filter(d => d['scents_group'] && d['middle_note']);
 
-        let noteFrequency = {};
+            let noteCount = {};
+            let totalNotesPerScent = {};
 
-        data.forEach(d => {
-            // clean commas and white space: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trim
-            let middleNotes = d['middle_note'].split(/,|\s+and\s+/i).map(note => note.trim());
-            let scent = d['scents_group']; 
+            data.forEach(d => {
+                let middleNotes = d['middle_note'].split(/,|\s+and\s+/i).map(note => note.trim());
+                let scent = d['scents_group'];
 
-            // count number of notes for each scent
-            middleNotes.forEach(note => {
-                if (!noteFrequency[note]) { noteFrequency[note] = {}; }
-                if (!noteFrequency[note][scent]) { noteFrequency[note][scent] = 0; }
-                noteFrequency[note][scent]++;
+                if (!totalNotesPerScent[scent]) { totalNotesPerScent[scent] = 0; }
+                
+                totalNotesPerScent[scent] += middleNotes.length;
+
+                middleNotes.forEach(note => {
+                    if (!noteCount[note]) { noteCount[note] = {}; }
+                    if (!noteCount[note][scent]) { noteCount[note][scent] = 0; }
+                    noteCount[note][scent]++;
+                });
             });
-        });
 
-        //  top 10 notes by total frequency
-        let totalNoteFrequency = {};
-        for (let note in noteFrequency) {
-            let totalCount = 0;
-            for (let scent in noteFrequency[note]) {
-                totalCount += noteFrequency[note][scent];
+            let totalNoteCount = {};
+            for (let note in noteCount) {
+                let totalCount = 0;
+                for (let scent in noteCount[note]) {
+                    totalCount += noteCount[note][scent];
+                }
+                totalNoteCount[note] = totalCount;
             }
-            totalNoteFrequency[note] = totalCount;
-        }
 
-        // take top 15 notes for each scent
-        let topNotes = Object.entries(totalNoteFrequency)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 15)
-            .map(entry => entry[0]);
+            let topNotes = Object.entries(totalNoteCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 16)
+                .map(entry => entry[0]);
 
-        // top 10 scents
-        let scents = Array.from(new Set(data.map(d => d['scents_group']))).slice(0, 10);
+            let scents = Array.from(new Set(data.map(d => d['scents_group']))).slice(0, 10);
 
-        let stackedData = [];
-        scents.forEach(scent => {
-            let entry = { scent: scent };
-            topNotes.forEach(note => {
-                entry[note] = noteFrequency[note] && noteFrequency[note][scent] ? noteFrequency[note][scent] : 0;
+            let stackedData = [];
+            scents.forEach(scent => {
+                let entry = { scent: scent };
+                topNotes.forEach(note => {
+                    let noteCountForScent = noteCount[note] && noteCount[note][scent] ? noteCount[note][scent] : 0;
+                    entry[note] = (noteCountForScent / totalNotesPerScent[scent]) * 100;
+                });
+                stackedData.push(entry);
             });
-            stackedData.push(entry);
-        });
 
-        //  scales
-        const xScale = d3.scaleBand()
-            .domain(scents)
-            .range([0, chartWidth])
-            .padding([0.1]);
+            const xScale = d3.scaleBand()
+                             .domain(scents)
+                             .range([0, chartWidth])
+                             .padding([0.1]);
 
-        const yScale = d3.scaleLinear()
-            .domain([0, d3.max(stackedData, d => {
-                return d3.sum(topNotes, note => d[note]);
-            })])
-            .range([chartHeight, 0]);
+            const yScale = d3.scaleLinear()
+                             .domain([0, 60])
+                             .range([chartHeight, 0]);
 
-        // x-axis
-        chartArea.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', `translate(0, ${chartHeight})`)
-            .call(d3.axisBottom(xScale))
-            .selectAll('text')
-            .style('text-anchor', 'end')
-            .attr('dx', '-7px')
-            .attr('dy', '0.15em')
-            .attr('transform', 'rotate(-40)');
+            chartArea.append('g')
+                     .attr('class', 'x axis')
+                     .attr('transform', `translate(0, ${chartHeight})`)
+                     .call(d3.axisBottom(xScale))
+                     .selectAll('text')
+                     .style('text-anchor', 'end')
+                     .attr('dx', '-7px')
+                     .attr('dy', '10px')
+                     .attr('transform', 'rotate(-40)');
 
-        // y-axis
-        chartArea.append('g')
-            .attr('class', 'y axis')
-            .call(d3.axisLeft(yScale));
+            chartArea.append('g')
+                     .attr('class', 'y axis')
+                     .call(d3.axisLeft(yScale));
 
-        // x-axis label
-        chartArea.append("text")
-            .attr("x", chartWidth / 2)
-            .attr("y", chartHeight + margins.bottom - 20)
-            .attr("text-anchor", "middle")
-            .style("font-size", "20px")
-            .text("Scent Groups");
+            const color = d3.scaleOrdinal()
+                .domain(topNotes)
+                .range(["#DDADAD", "#ECD2D1", "#FBFBFB", "#B6C5CA", "#C7C0B6", "#B8AAA7", "#A5BBD3", "#F3DBCF", 
+                "#C9BBC8", "#CAC093", "#8795A0", "#71677c", "#ddbea8", "#b8bedd", "#e0afa0"]);
 
-        // y-axis label
-        chartArea.append("text")
-            .attr("text-anchor", "middle")
-            .attr("transform", `translate(${-margins.left + 40}, ${chartHeight / 2}) rotate(-90)`)
-            .style("font-size", "20px")
-            .text("Frequency of Middle Notes");
+            const stackedDataForD3 = d3.stack()
+                .keys(topNotes)
+                (stackedData);
 
-        const color = d3.scaleOrdinal()
-            .domain(topNotes)
-            .range(["#d8e2dc", "#ffe5d9", "#ffcad4", "#9d8189", "#fec89a", "#cae9ff", "#dde7c7", "#ed6a5a", 
-            "#eaeaea", "#cbf3f0", "#f7c59f", "#71677c", "#ddbea8", "#b8bedd", "#e0afa0"]);
-
-        // stack
-        const stackedDataForD3 = d3.stack()
-            .keys(topNotes)
-            (stackedData);
-
-        // bars 
-        chartArea.append("g")
-            .selectAll("g")
-            .data(stackedDataForD3)
-            .enter().append("g")
-            .attr("fill", d => color(d.key))
-            .selectAll("rect")
-            .data(d => d)
-            .enter()
-            .append("rect")
-            .attr("x", d => xScale(d.data.scent))
-            .attr("y", d => yScale(d[1]))
-            .attr("height", d => yScale(d[0]) - yScale(d[1]))
-            .attr("width", xScale.bandwidth())
-            .attr("stroke", "grey")
-            // .on("mouseover", function(event, d) {
-            //     const noteName = d3.select(this.parentNode).datum().key;
-            //     d3.select("#label").text(`${noteName}`);
-            //     d3.select(this).attr("opacity", 0.7);
-            // })
-            // .on("mouseleave", function() {
-            //     d3.select("#label").text("");
-            //     d3.select(this).attr("opacity", 1);
-            // });
+            chartArea.append("g")
+                .selectAll("g")
+                .data(stackedDataForD3)
+                .enter().append("g")
+                .attr("fill", d => color(d.key))
+                .selectAll("rect")
+                .data(d => d)
+                .enter()
+                .append("rect")
+                .attr("x", d => xScale(d.data.scent))
+                .attr("y", d => yScale(d[1]))
+                .attr("height", d => yScale(d[0]) - yScale(d[1]))
+                .attr("width", xScale.bandwidth())
+                .attr("stroke", "grey");
     });
-
-    
     </script>
 </body>
 </html>
