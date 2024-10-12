@@ -6,21 +6,20 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
-      font-family: 'Tahoma', "sans-serif";
+      font-family: 'Times New Roman';
       margin: 0;
       padding: 0;
     }
 
     header {
-      background-color: #cde7ff;
-      padding: 40px;
+      padding: 20px;
       text-align: center;
     }
 
     h2 {
       color: #333;
       text-align: left;
-      font-size: 35px;
+      font-size: 30px;
       margin-top: -10px;
     }
 
@@ -30,6 +29,7 @@
       font-size: 20px;
       margin-top: -20px;
       margin-bottom: 20px;
+      font-style: italic;
     }
 
     #caption {
@@ -42,13 +42,13 @@
 
     #header-h1 {
       margin: 0;
-      font-size: 40px;
+      font-size: 30px;
       color: #333;
     }
 
     #box-h3 {
-      font-family: 'Tahoma', serif;
-      font-size: 24px;
+      font-family: 'Times New Roman';
+      font-size: 22px;
       text-align: center;
     }
 
@@ -59,7 +59,7 @@
     }
 
     #box-legend {
-      font-family: 'Tahoma', serif;
+      font-family: 'Times New Roman';
       margin-left: 350px;
     }
 
@@ -83,7 +83,7 @@
 
     #pie-title {
       text-align: center;
-      font-size: 25px;
+      font-size: 22px;
       font-weight: bold;
       margin-bottom: -40px;
     }
@@ -131,7 +131,7 @@
 </head>
 
 <header>
-  <h1 id="header-h1">INFO3300 Project 1: Perfume Analysis</h1>
+  <h1 id="header-h1"> Perfume Analysis</h1>
 </header>
 
 <body>
@@ -144,9 +144,9 @@
 
     <div id="caption">
       <h2>Scents Across Different Departments: Men, Women, & Unisex</h2>
-      <p>Which types of scents are targeted to be more for men or more for women? This chart aims to explore the
+      <p>This chart aims to explore the
         proportion of scents of the perfumes
-        sold in each of the three different departments during retail. This may be a peek into which smells and notes
+        sold in each of the three different departments during retail to answer the following question: Which types of scents are targeted to be more for men or more for women? This may be a peek into which smells and notes
         are traditionally
         considered masculine, feminine, or androgynous. If there's an overwhelming majority for one specific scent in
         any of the departments,
@@ -155,7 +155,7 @@
       </p>
     </div>
 
-    <h1 id="pie-title">Prominent Scents in Each Department</h1>
+    <h1 id="pie-title">Breakdown of Scents in Each Department</h1>
     <svg id="piechart" height="50" width="50"></svg>
 
     <text id="label"></text>
@@ -179,7 +179,7 @@
 
       // changed so prettier colors
       const color = d3.scaleOrdinal()
-        .domain(['Floral', 'Woody', 'Spicy', 'Fruity', 'Fresh', 'Oriental', 'Aromatic'])
+        .domain(['Floral', 'Woody', 'Spicy', 'Fruity', 'Fresh', 'Oriental'])
         // .range(['#2E86C1', '#9B59B6', '#C0392B', '#F1C40F', '#28B463', '#BDC3C7', '#2E4053', '#DA23C1', '#EDBB99', '#76D7C4']);
         .range(d3.schemeSet3);
 
@@ -296,7 +296,7 @@
 
   <div id="boxplot-data">
     <div id="caption">
-      <h2>Correlation between perfume price and its scent and department</h2>
+      <h2>Correlation between Perfume Price, Scent, and Department</h2>
       <p>Are there differences between how much a floral perfume is priced compared to an oriental perfume, or a floral
         perfume for
         the mens department, compared to a floral perffume for the womens department?
@@ -305,8 +305,8 @@
       </p>
     </div>
 
-    <h3>Perfumes Price vs Scent Groups by Department</h3>
-    <svg id="chart" height="700" width="1500" style="font-family: 'Tahoma', serif;"></svg>
+    <h3 id = "box-h3">Perfumes Price vs Scents by Department</h3>
+    <svg id="chart" height="700" width="1500" style="font-family: 'Times New Roman'"></svg>
     <div id="legend"></div>
 
     <script>
@@ -319,7 +319,7 @@
 
           // Use 10 scent groups based on the pivot table analysis and selected any scents with > 10 records
           //const scentGroups = ['Floral', 'Woody', 'Spicy', 'Citrus', 'Fruity', 'Arabian', 'Fresh', 'Oriental', 'Vanilla', 'Aromatic'];
-          const scentGroups = ['Floral', 'Woody', 'Spicy', 'Fruity', 'Fresh', 'Oriental', 'Aromatic'];
+          const scentGroups = ['Floral', 'Woody', 'Spicy', 'Fruity', 'Fresh', 'Oriental'];
           // Use only these 3 departments as "Kids" has only 1 record
           const departments = ['Unisex', 'Women', 'Men'];
           // Filter the data to include only specified scent groups and departments
@@ -374,7 +374,7 @@
             .attr("text-anchor", "middle")
             .attr("font-size", "16px")
             .style("font-weight", "bold")
-            .text("Scent Group");
+            .text("Scents");
 
           svg.append("g")
             .call(d3.axisLeft(y).tickFormat(d3.format("$~s")));
@@ -566,11 +566,11 @@
 
   <div id="middlenote-data">
     <div id="caption">
-      <h2>Middle notes in the scent families</h2>
+      <h2>Middle Notes in Scent Families</h2>
       <p>
         We pulled the top 15 most frequently occurring middle notes out of all the perfumes, and calculated how much
         they appear
-        in each of 7 scent groups. The greater the total proportion of the scent group, the more that the top 15 middle
+        in each of 7 scent groups to answer the following question: How much do the 15 most common middle notes take up in different perfume scents? The greater the total proportion of the scent group, the more that the top 15 middle
         notes are
         used, as opposed to less popular notes. Additionally, we can see just how many perfumes have each of the 15
         middle notes out
@@ -578,7 +578,7 @@
       </p>
     </div>
 
-    <h3>How much do the 15 most common middle notes take up in different perfume scents?</h3>
+    <h3>Proportion of Middle Notes vs Scent</h3>
     <svg id="stackedchart" width="1400" height="700"></svg>
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
     <div id="middlenotelegend"
@@ -657,7 +657,7 @@
         chartArea.append('g')
           .attr('class', 'y axis')
           .call(d3.axisLeft(yScale))
-          .style("font-family", "Tahoma")
+          .style("font-family", "Times New Roman")
           .style("font-size", "14px")
           .style("font-weight", "bold");
 
@@ -690,7 +690,7 @@
           .call(d3.axisBottom(xScale))
           .selectAll('text')
           .style('text-anchor', 'end')
-          .style("font-family", "Tahoma")
+          .style("font-family", "Times New Roman")
           .style("font-weight", "bold")
           .style("font-size", "14px")
           .attr('dx', '-7px')
@@ -703,7 +703,7 @@
           .attr('text-anchor', 'middle')
           .attr('font-size', '16px')
           .attr('font-weight', 'bold')
-          .style("font-family", "Tahoma")
+          .style("font-family", "Times New Roman")
           .text('Scents');
         chartArea.append('text')
           .attr('transform', 'rotate(-90)')
@@ -712,7 +712,7 @@
           .attr('text-anchor', 'middle')
           .attr('font-size', '16px')
           .attr('font-weight', 'bold')
-          .style("font-family", "Tahoma")
+          .style("font-family", "Times New Roman")
           .text('Proportion of Middle Notes (%)');
 
         const middlenoteLegend = d3.select("#middlenotelegend");
@@ -733,7 +733,7 @@
             .text(note)
             .style("margin-right", "20px")
             .style("font-size", "15px")
-            .style("font-family", "Tahoma");
+            .style("font-family", "Times New Roman");
         });
       });
     </script>
@@ -741,16 +741,17 @@
 
   <div id="basenote-data">
     <div id="caption">
-      <h2>Base notes in the scent families</h2>
+      <h2>Base Notes in Scent Families</h2>
       <p>Following the same idea as before, we pulled the top 15 most frequently occurring base notes out of all the
         perfumes
         and calculated how much they appear in each of 7 scent groups. How much variation in note use is there between
         each scent group?
         Which scent group's perfumes have a smaller share of popular notes, thus leaving more variation in less common
-        notes?
+        notes? Lastly, how much do the 15 most common base notes take up in different perfume scents?
+
       </p>
     </div>
-    <h3>How much do the 15 most common base notes take up in different perfume scents?</h3>
+    <h3>Proportion of Base Notes vs Scents</h3>
     <svg id="stackedchart2" width="1400" height="700"></svg>
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
     <div id="basenotelegend"
@@ -829,7 +830,7 @@
         chartAreab.append('g')
           .attr('class', 'y axis')
           .call(d3.axisLeft(yScale))
-          .style("font-family", "Tahoma")
+          .style("font-family", "Times New Roman")
           .style("font-size", "14px")
           .style("font-weight", "bold");
 
@@ -862,7 +863,7 @@
           .call(d3.axisBottom(xScale))
           .selectAll('text')
           .style('text-anchor', 'end')
-          .style("font-family", "Tahoma")
+          .style("font-family", "Times New Roman")
           .style("font-weight", "bold")
           .style("font-size", "14px")
           .attr('dx', '-7px')
@@ -875,7 +876,7 @@
           .attr('text-anchor', 'middle')
           .attr('font-size', '16px')
           .attr('font-weight', 'bold')
-          .style("font-family", "Tahoma")
+          .style("font-family", "Times New Roman")
           .text('Scents');
         chartAreab.append('text')
           .attr('transform', 'rotate(-90)')
@@ -884,7 +885,7 @@
           .attr('text-anchor', 'middle')
           .attr('font-size', '16px')
           .attr('font-weight', 'bold')
-          .style("font-family", "Tahoma")
+          .style("font-family", "Times New Roman")
           .text('Proportion of Base Notes (%)');
 
         const basenoteLegend = d3.select("#basenotelegend");
@@ -905,7 +906,7 @@
             .text(note)
             .style("margin-right", "30px")
             .style("font-size", "15px")
-            .style("font-family", "Tahoma");
+            .style("font-family", "Times New Roman");
         });
       });
     </script>
