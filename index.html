@@ -568,13 +568,10 @@
     <div id="caption">
       <h2>Middle Notes in Scent Families</h2>
       <p>
-        We pulled the top 15 most frequently occurring middle notes out of all the perfumes, and calculated how much
-        they appear
-        in each of 7 scent groups to answer the following question: How much do the 15 most common middle notes take up in different perfume scents? The greater the total proportion of the scent group, the more that the top 15 middle
-        notes are
-        used, as opposed to less popular notes. Additionally, we can see just how many perfumes have each of the 15
-        middle notes out
-        of each scent group!
+        We pulled the top 15 most frequently occurring middle notes out of all the perfumes, and calculated how much they appear 
+        in each of 7 scent groups to answer the following question: How much do the 15 most common middle notes take up in different 
+        perfume scents? The greater the total proportion of the scent group, the more that the top 15 middle notes are used, as opposed 
+        to less popular notes. Additionally, we can see just how many perfumes have each of the 15 middle notes out of each scent group!
       </p>
     </div>
 
@@ -595,15 +592,19 @@
       const chartHeight = heightm - margins.top - margins.bottom;
 
       const chartArea = svg.append('g')
-        .attr('transform', `translate(${margins.left}, ${margins.top})`);
+                           .attr('transform', `translate(${margins.left}, ${margins.top})`);
 
-      d3.json("filtered_top_8_scents.json").then(function (data) {
+      d3.json("filtered_top_8_scents.json").then((data) => {
+
+        // keep only scent groups and middle note columns
         data = data.filter(d => d['scents_group'] && d['middle_note']);
 
+        // keep track of notes per scent
         let noteCount = {};
         let totalNotesPerScent = {};
 
         data.forEach(d => {
+          // clean middle note names, trim whitespace
           let middleNotes = d['middle_note'].split(/,|\s+and\s+/i).map(note => note.trim());
           let scent = d['scents_group'];
 
@@ -627,113 +628,121 @@
           totalNoteCount[note] = totalCount;
         }
 
+        // store notes as key-value pairs
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
+        // https://d3-graph-gallery.com/graph/basic_datamanipulation.html
         let topNotes = Object.entries(totalNoteCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 16)
-          .map(entry => entry[0]);
-        console.log(topNotes);
+                             .sort((a, b) => b[1] - a[1])
+                             .slice(0, 16)
+                             .map(entry => entry[0]);
+        // console.log(topNotes);
 
         let scents = Array.from(new Set(data.map(d => d['scents_group']))).slice(0, 10);
 
+        // stacked bars, with each segment representing proportion out of 100%
         let stackedData = [];
         scents.forEach(scent => {
           let entry = { scent: scent };
           topNotes.forEach(note => {
+            // check if note exists in noteCount and in scent group, otherwise assign count = 0
             let noteCountForScent = noteCount[note] && noteCount[note][scent] ? noteCount[note][scent] : 0;
             entry[note] = (noteCountForScent / totalNotesPerScent[scent]) * 100;
           });
           stackedData.push(entry);
         });
 
+        // x-axis: scent groups
         const xScale = d3.scaleBand()
-          .domain(scents)
-          .range([0, chartWidth])
-          .padding([0.1]);
+                         .domain(scents)
+                         .range([0, chartWidth])
+                         .padding([0.1]);
 
+        // max height for any of the bars is 60%
         const yScale = d3.scaleLinear()
-          .domain([0, 60])
-          .range([chartHeight, 0]);
+                         .domain([0, 60])
+                         .range([chartHeight, 0]);
 
         chartArea.append('g')
-          .attr('class', 'y axis')
-          .call(d3.axisLeft(yScale))
-          .style("font-family", "Times New Roman")
-          .style("font-size", "14px")
-          .style("font-weight", "bold");
+                 .attr('class', 'y axis')
+                 .call(d3.axisLeft(yScale))
+                 .style("font-family", "Times New Roman")
+                 .style("font-size", "14px")
+                 .style("font-weight", "bold");
 
         const color = d3.scaleOrdinal()
-          .domain(topNotes)
-          .range(["#f5ebe0", "#c1121f", "#ffc2d1", "#ffe6a7", "#cdb4db", "#fb8b24", "#9f86c0", "#fcca46",
-            "#adc178", "#d8e2dc", "#3d348b", "#9d8189", "#dde5b6", "#c08552", "#a63c06", "#710000"]);
+                        .domain(topNotes)
+                        .range(["#f5ebe0", "#c1121f", "#ffc2d1", "#ffe6a7", "#cdb4db", "#fb8b24", "#9f86c0", "#fcca46",
+                          "#adc178", "#d8e2dc", "#3d348b", "#9d8189", "#dde5b6", "#c08552", "#a63c06", "#710000"]);
 
         const stackedDataForD3 = d3.stack()
-          .keys(topNotes)
-          (stackedData);
+                                   .keys(topNotes)(stackedData);
 
         chartArea.append("g")
-          .selectAll("g")
-          .data(stackedDataForD3)
-          .enter().append("g")
-          .attr("fill", d => color(d.key))
-          .selectAll("rect")
-          .data(d => d)
-          .enter()
-          .append("rect")
-          .attr("x", d => xScale(d.data.scent))
-          .attr("y", d => yScale(d[1]))
-          .attr("height", d => yScale(d[0]) - yScale(d[1]))
-          .attr("width", xScale.bandwidth());
+                 .selectAll("g")
+                 .data(stackedDataForD3)
+                 .enter().append("g")
+                 .attr("fill", d => color(d.key))
+                 .selectAll("rect")
+                 .data(d => d)
+                 .enter()
+                 .append("rect")
+                 .attr("x", d => xScale(d.data.scent))
+                 .attr("y", d => yScale(d[1]))
+                 .attr("height", d => yScale(d[0]) - yScale(d[1]))
+                 .attr("width", xScale.bandwidth());
 
         chartArea.append('g')
-          .attr('class', 'x axis')
-          .attr('transform', `translate(0, ${chartHeight})`)
-          .call(d3.axisBottom(xScale))
-          .selectAll('text')
-          .style('text-anchor', 'end')
-          .style("font-family", "Times New Roman")
-          .style("font-weight", "bold")
-          .style("font-size", "14px")
-          .attr('dx', '-7px')
-          .attr('dy', '10px')
-          .attr('transform', 'rotate(-40)');
+                 .attr('class', 'x axis')
+                 .attr('transform', `translate(0, ${chartHeight})`)
+                 .call(d3.axisBottom(xScale))
+                 .selectAll('text')
+                 .style('text-anchor', 'end')
+                 .style("font-family", "Times New Roman")
+                 .style("font-weight", "bold")
+                 .style("font-size", "14px")
+                 .attr('dx', '-7px')
+                 .attr('dy', '10px')
+                 .attr('transform', 'rotate(-40)');
 
         chartArea.append('text')
-          .attr('x', chartWidth / 2)
-          .attr('y', chartHeight + margins.bottom - 10)
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '16px')
-          .attr('font-weight', 'bold')
-          .style("font-family", "Times New Roman")
-          .text('Scents');
+                .attr('x', chartWidth / 2)
+                .attr('y', chartHeight + margins.bottom - 10)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '16px')
+                .attr('font-weight', 'bold')
+                .style("font-family", "Times New Roman")
+                .text('Scents');
+        
         chartArea.append('text')
-          .attr('transform', 'rotate(-90)')
-          .attr('x', -chartHeight / 2)
-          .attr('y', -margins.left + 40)
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '16px')
-          .attr('font-weight', 'bold')
-          .style("font-family", "Times New Roman")
-          .text('Proportion of Middle Notes (%)');
+                .attr('transform', 'rotate(-90)')
+                .attr('x', -chartHeight / 2)
+                .attr('y', -margins.left + 40)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '16px')
+                .attr('font-weight', 'bold')
+                .style("font-family", "Times New Roman")
+                .text('Proportion of Middle Notes (%)');
 
+        // chart legend
         const middlenoteLegend = d3.select("#middlenotelegend");
         topNotes.forEach(note => {
           const noteSpan = middlenoteLegend.append("span")
-            .style("display", "inline-flex")
-            .style("align-items", "center")
-            .style("margin-right", "8px");
+                                          .style("display", "inline-flex")
+                                          .style("align-items", "center")
+                                          .style("margin-right", "8px");
 
           noteSpan.append("span")
-            .style("display", "inline-block")
-            .style("width", "30px")
-            .style("height", "20px")
-            .style("background-color", color(note))
-            .style("margin-right", "8px");
+                  .style("display", "inline-block")
+                  .style("width", "30px")
+                  .style("height", "20px")
+                  .style("background-color", color(note))
+                  .style("margin-right", "8px");
 
           noteSpan.append("span")
-            .text(note)
-            .style("margin-right", "20px")
-            .style("font-size", "15px")
-            .style("font-family", "Times New Roman");
+                  .text(note)
+                  .style("margin-right", "20px")
+                  .style("font-size", "15px")
+                  .style("font-family", "Times New Roman");
         });
       });
     </script>
@@ -742,18 +751,17 @@
   <div id="basenote-data">
     <div id="caption">
       <h2>Base Notes in Scent Families</h2>
-      <p>Following the same idea as before, we pulled the top 15 most frequently occurring base notes out of all the
-        perfumes
-        and calculated how much they appear in each of 7 scent groups. How much variation in note use is there between
-        each scent group?
-        Which scent group's perfumes have a smaller share of popular notes, thus leaving more variation in less common
-        notes? Lastly, how much do the 15 most common base notes take up in different perfume scents?
-
+      <p>Following the same idea as before, we pulled the top 15 most frequently occurring base notes out of all the perfumes
+        and calculated how much they appear in each of 7 scent groups. How much variation in note use is there between each scent group?
+        Which scent group's perfumes have a smaller share of popular notes, thus leaving more variation in less common notes? Lastly, 
+        how much do the 15 most common base notes take up in different perfume scents?
       </p>
     </div>
+
     <h3>Proportion of Base Notes vs Scents</h3>
     <svg id="stackedchart2" width="1400" height="700"></svg>
     <text id="label" x="760" y="0" text-anchor="end" alignment-baseline="hanging"></text>
+    
     <div id="basenotelegend"
       style="width: 900px; margin: 20px auto; justify-content: center; display: flex; flex-wrap: wrap; row-gap: 15px;">
     </div>
@@ -801,10 +809,10 @@
         }
 
         let topNotes = Object.entries(totalNoteCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 16)
-          .map(entry => entry[0]);
-        console.log(topNotes);
+                            .sort((a, b) => b[1] - a[1])
+                            .slice(0, 16)
+                            .map(entry => entry[0]);
+        // console.log(topNotes);
 
         let scents = Array.from(new Set(data.map(d => d['scents_group']))).slice(0, 10);
 
@@ -819,94 +827,94 @@
         });
 
         const xScale = d3.scaleBand()
-          .domain(scents)
-          .range([0, chartWidthb])
-          .padding([0.1]);
+                        .domain(scents)
+                        .range([0, chartWidthb])
+                        .padding([0.1]);
 
         const yScale = d3.scaleLinear()
-          .domain([0, 75])
-          .range([chartHeightb, 0]);
+                        .domain([0, 75])
+                        .range([chartHeightb, 0]);
 
         chartAreab.append('g')
-          .attr('class', 'y axis')
-          .call(d3.axisLeft(yScale))
-          .style("font-family", "Times New Roman")
-          .style("font-size", "14px")
-          .style("font-weight", "bold");
+                  .attr('class', 'y axis')
+                  .call(d3.axisLeft(yScale))
+                  .style("font-family", "Times New Roman")
+                  .style("font-size", "14px")
+                  .style("font-weight", "bold");
 
         const color = d3.scaleOrdinal()
-          .domain(topNotes)
-          .range(["#ddbea8", "#ee9b00", "#99582a", "#9d8189", "#e2ece9", "#ee6c4d", "#a7c957",
-            "#003049", "#2b9348", "#432818", "#e7c6ff", "#9e2a2b", "#ffe6a7", "#2ec4b6", "#5f0f40", "#014f86"]);
+                        .domain(topNotes)
+                        .range(["#ddbea8", "#ee9b00", "#99582a", "#9d8189", "#e2ece9", "#ee6c4d", "#a7c957",
+                          "#003049", "#2b9348", "#432818", "#e7c6ff", "#9e2a2b", "#ffe6a7", "#2ec4b6", "#5f0f40", "#014f86"]);
 
         const stackedDataForD3 = d3.stack()
-          .keys(topNotes)
-          (stackedData);
+                                  .keys(topNotes)(stackedData);
 
         chartAreab.append("g")
-          .selectAll("g")
-          .data(stackedDataForD3)
-          .enter().append("g")
-          .attr("fill", d => color(d.key))
-          .selectAll("rect")
-          .data(d => d)
-          .enter()
-          .append("rect")
-          .attr("x", d => xScale(d.data.scent))
-          .attr("y", d => yScale(d[1]))
-          .attr("height", d => yScale(d[0]) - yScale(d[1]))
-          .attr("width", xScale.bandwidth());
+                  .selectAll("g")
+                  .data(stackedDataForD3)
+                  .enter().append("g")
+                  .attr("fill", d => color(d.key))
+                  .selectAll("rect")
+                  .data(d => d)
+                  .enter()
+                  .append("rect")
+                  .attr("x", d => xScale(d.data.scent))
+                  .attr("y", d => yScale(d[1]))
+                  .attr("height", d => yScale(d[0]) - yScale(d[1]))
+                  .attr("width", xScale.bandwidth());
 
         chartAreab.append('g')
-          .attr('class', 'x axis')
-          .attr('transform', `translate(0, ${chartHeightb})`)
-          .call(d3.axisBottom(xScale))
-          .selectAll('text')
-          .style('text-anchor', 'end')
-          .style("font-family", "Times New Roman")
-          .style("font-weight", "bold")
-          .style("font-size", "14px")
-          .attr('dx', '-7px')
-          .attr('dy', '10px')
-          .attr('transform', 'rotate(-40)');
+                  .attr('class', 'x axis')
+                  .attr('transform', `translate(0, ${chartHeightb})`)
+                  .call(d3.axisBottom(xScale))
+                  .selectAll('text')
+                  .style('text-anchor', 'end')
+                  .style("font-family", "Times New Roman")
+                  .style("font-weight", "bold")
+                  .style("font-size", "14px")
+                  .attr('dx', '-7px')
+                  .attr('dy', '10px')
+                  .attr('transform', 'rotate(-40)');
 
         chartAreab.append('text')
-          .attr('x', chartWidthb / 2)
-          .attr('y', chartHeightb + marginsb.bottom - 10)
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '16px')
-          .attr('font-weight', 'bold')
-          .style("font-family", "Times New Roman")
-          .text('Scents');
+                  .attr('x', chartWidthb / 2)
+                  .attr('y', chartHeightb + marginsb.bottom - 10)
+                  .attr('text-anchor', 'middle')
+                  .attr('font-size', '16px')
+                  .attr('font-weight', 'bold')
+                  .style("font-family", "Times New Roman")
+                  .text('Scents');
+       
         chartAreab.append('text')
-          .attr('transform', 'rotate(-90)')
-          .attr('x', -chartHeightb / 2)
-          .attr('y', -marginsb.left + 40)
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '16px')
-          .attr('font-weight', 'bold')
-          .style("font-family", "Times New Roman")
-          .text('Proportion of Base Notes (%)');
+                  .attr('transform', 'rotate(-90)')
+                  .attr('x', -chartHeightb / 2)
+                  .attr('y', -marginsb.left + 40)
+                  .attr('text-anchor', 'middle')
+                  .attr('font-size', '16px')
+                  .attr('font-weight', 'bold')
+                  .style("font-family", "Times New Roman")
+                  .text('Proportion of Base Notes (%)');
 
         const basenoteLegend = d3.select("#basenotelegend");
         topNotes.forEach(note => {
           const noteSpanbase = basenoteLegend.append("span")
-            .style("display", "inline-flex")
-            .style("align-items", "center")
-            .style("margin-right", "8px");
+                                            .style("display", "inline-flex")
+                                            .style("align-items", "center")
+                                            .style("margin-right", "8px");
 
           noteSpanbase.append("span")
-            .style("display", "inline-block")
-            .style("width", "30px")
-            .style("height", "20px")
-            .style("background-color", color(note))
-            .style("margin-right", "8px");
+                      .style("display", "inline-block")
+                      .style("width", "30px")
+                      .style("height", "20px")
+                      .style("background-color", color(note))
+                      .style("margin-right", "8px");
 
           noteSpanbase.append("span")
-            .text(note)
-            .style("margin-right", "30px")
-            .style("font-size", "15px")
-            .style("font-family", "Times New Roman");
+                      .text(note)
+                      .style("margin-right", "30px")
+                      .style("font-size", "15px")
+                      .style("font-family", "Times New Roman");
         });
       });
     </script>
